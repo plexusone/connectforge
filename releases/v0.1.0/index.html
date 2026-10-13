@@ -1023,6 +1023,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1219,6 +1230,17 @@
     <span class="md-ellipsis">
       
         Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
       
     </span>
   </a>
@@ -1472,7 +1494,12 @@ in-memory <code>Cryptographer</code> for tests.</p>
 </tr>
 </tbody>
 </table>
-<p>The module imports no database driver. The host chooses one.</p>
+<p>The module imports no database driver; the host chooses one. <code>pgx</code> and
+<code>modernc.org/sqlite</code> appear in <code>go.mod</code> only for the store tests.</p>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<p>A <a href="../../guides/">user guide</a> covers connections and their lifecycle,
+using a connection, writing a provider, integrating with a host, storage and
+security, starting from <a href="../../getting-started/">Getting started</a>.</p>
 
 
 
