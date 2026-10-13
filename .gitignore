@@ -6,3 +6,5 @@ coverage.out
 .env.*
 !.env.example
 /connectionforge
+site/
+__pycache__/
