@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -363,5 +364,233 @@ func TestNoSecretLeaks(t *testing.T) {
 				t.Fatalf("token leaked: %s", o)
 			}
 		}
+	}
+}
+
+func (e *env) reconnect(t *testing.T, as cf.Principal, id, tok string) (cf.Connection, error) {
+	t.Helper()
+	return e.svc.Reconnect(context.Background(), service.ReconnectInput{
+		Owner: owner, Actor: as, ID: id,
+		Fields: map[string]cf.Secret{"token": cf.SecretString(tok)},
+	})
+}
+
+// seen reports whether the fake API received a request with this token.
+func (e *env) seen(tok string) bool {
+	return slices.Contains(e.api.Seen(), "Bearer "+tok)
+}
+
+func TestReconnectReplacesTheCredential(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	use := cf.Use{Consumer: cf.Consumer{Kind: "application", ID: "dash"}, Purpose: "traffic"}
+	if err := e.svc.Bind(ctx, owner, agent, c.ID, use.Consumer, use.Purpose); err != nil {
+		t.Fatal(err)
+	}
+
+	// The token is revoked upstream, and a check finds it.
+	e.api.Revoke(fakeapi.Good)
+	if c, err = e.svc.Test(ctx, owner, admin, c.ID); err != nil || c.State != cf.StateNeedsAttention {
+		t.Fatalf("after revocation: %+v, %v", c, err)
+	}
+
+	// A new token for the same account puts it right without a new
+	// connection, so the binding is untouched.
+	r, err := e.reconnect(t, admin, c.ID, fakeapi.Rotated)
+	if err != nil {
+		t.Fatalf("reconnect: %v", err)
+	}
+	if r.ID != c.ID || r.State != cf.StateConnected || r.Health.LastValidation != cf.OutcomeOK || r.Health.ConsecutiveFails != 0 {
+		t.Fatalf("reconnected: %+v", r)
+	}
+	cr, err := e.store.ActiveCredential(ctx, owner, c.ID)
+	if err != nil || cr.Version != 2 {
+		t.Fatalf("credential version: %+v, %v", cr, err)
+	}
+	if bs, err := e.svc.Bindings(ctx, owner, member, c.ID); err != nil || len(bs) != 1 {
+		t.Fatalf("bindings after reconnect: %v, %v", bs, err)
+	}
+
+	// Requests now carry the new token.
+	hc, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, use)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := hc.Get(e.api.URL + "/data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := resp.Body.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if !e.seen(fakeapi.Rotated) {
+		t.Fatalf("the new token was not used: %v", e.api.Seen())
+	}
+	if got := e.audit.types(); got[len(got)-1] != cf.EventCredentialReplaced {
+		t.Fatalf("not audited: %v", got)
+	}
+}
+
+func TestReconnectRefusals(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := e.store.ActiveCredential(ctx, owner, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unchanged := func(why string) {
+		t.Helper()
+		after, err := e.store.ActiveCredential(ctx, owner, c.ID)
+		if err != nil || after.Version != before.Version {
+			t.Fatalf("%s changed the credential: %+v, %v", why, after, err)
+		}
+		got, err := e.store.GetConnection(ctx, owner, c.ID)
+		if err != nil || got.Revision != c.Revision {
+			t.Fatalf("%s changed the connection: %+v, %v", why, got, err)
+		}
+	}
+
+	_, err = e.reconnect(t, admin, c.ID, "wrong")
+	if !errors.Is(err, cf.ErrInvalidCredential) || strings.Contains(err.Error(), "wrong") {
+		t.Fatalf("rejected token: %v", err)
+	}
+	unchanged("a rejected token")
+	if _, err := e.reconnect(t, admin, c.ID, fakeapi.OtherAccount); !errors.Is(err, cf.ErrAccountMismatch) {
+		t.Fatalf("another account: %v", err)
+	}
+	unchanged("another account")
+	if _, err := e.reconnect(t, member, c.ID, fakeapi.Rotated); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("member reconnect: %v", err)
+	}
+	unchanged("a refused member")
+	if _, err := e.svc.Reconnect(ctx, service.ReconnectInput{Owner: owner, Actor: admin, ID: c.ID}); !errors.Is(err, service.ErrInvalidInput) {
+		t.Fatalf("no fields: %v", err)
+	}
+	if _, err := e.reconnect(t, admin, "missing", fakeapi.Rotated); !errors.Is(err, cf.ErrNotFound) {
+		t.Fatalf("missing connection: %v", err)
+	}
+}
+
+func TestReconnectRecoversAnUnreadableCredential(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Simulate a lost key ring: the stored ciphertext can no longer be opened.
+	if err := e.store.SwapCredential(ctx, 1, cf.Credential{
+		Owner: owner, ConnectionID: c.ID, Version: 2, Kind: "api_token", Ciphertext: []byte("not-sealed-by-this-key"),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	use := cf.Use{Consumer: cf.Consumer{Kind: "application", ID: "dash"}, Purpose: "traffic"}
+	if _, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, use); !errors.Is(err, cf.ErrCredentialUnavailable) {
+		t.Fatalf("unreadable credential: %v", err)
+	}
+	if _, err := e.reconnect(t, admin, c.ID, fakeapi.Good); err != nil {
+		t.Fatalf("reconnect: %v", err)
+	}
+	if _, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, use); err != nil {
+		t.Fatalf("after reconnect: %v", err)
+	}
+}
+
+func TestReconnectAfterDisconnectAndRevoked(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.svc.Disconnect(ctx, owner, admin, c.ID); err != nil {
+		t.Fatal(err)
+	}
+	r, err := e.reconnect(t, admin, c.ID, fakeapi.Good)
+	if err != nil || r.State != cf.StateConnected {
+		t.Fatalf("reconnect after disconnect: %+v, %v", r, err)
+	}
+	if cr, err := e.store.ActiveCredential(ctx, owner, c.ID); err != nil || cr.Version != 1 {
+		t.Fatalf("credentials were destroyed, so the new one is version 1: %+v, %v", cr, err)
+	}
+
+	// A revoked connection is terminal.
+	revoked := r
+	revoked.State = cf.StateRevoked
+	if _, err := e.store.UpdateConnection(ctx, revoked); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.reconnect(t, admin, c.ID, fakeapi.Good); !errors.Is(err, cf.ErrNotUsable) {
+		t.Fatalf("reconnect a revoked connection: %v", err)
+	}
+}
+
+func TestBindings(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	site := cf.Consumer{Kind: "portfolio.site", ID: "impactchiefs.com"}
+
+	if err := e.svc.Bind(ctx, owner, member, c.ID, site, "traffic"); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("a viewer bound a connection: %v", err)
+	}
+	for range 2 { // idempotent
+		if err := e.svc.Bind(ctx, owner, agent, c.ID, site, "traffic"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := e.svc.Bind(ctx, owner, agent, c.ID, site, "security"); err != nil {
+		t.Fatal(err)
+	}
+	bs, err := e.svc.Bindings(ctx, owner, member, c.ID)
+	if err != nil || len(bs) != 2 || bs[0].Purpose != "security" || bs[1].Purpose != "traffic" {
+		t.Fatalf("bindings: %+v, %v", bs, err)
+	}
+	stranger := cf.Principal{Kind: cf.PrincipalUser, ID: "stranger"}
+	if _, err := e.svc.Bindings(ctx, owner, stranger, c.ID); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("a stranger listed bindings: %v", err)
+	}
+	if err := e.svc.Unbind(ctx, owner, agent, c.ID, site, "traffic"); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.svc.Unbind(ctx, owner, agent, c.ID, site, "traffic"); err != nil {
+		t.Fatalf("unbinding none: %v", err)
+	}
+	if bs, err = e.svc.Bindings(ctx, owner, admin, c.ID); err != nil || len(bs) != 1 {
+		t.Fatalf("after unbind: %+v, %v", bs, err)
+	}
+	for name, consumer := range map[string]cf.Consumer{"no kind": {ID: "x"}, "no id": {Kind: "x"}} {
+		if err := e.svc.Bind(ctx, owner, agent, c.ID, consumer, "traffic"); !errors.Is(err, service.ErrInvalidInput) {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+	if err := e.svc.Bind(ctx, owner, agent, c.ID, site, ""); !errors.Is(err, service.ErrInvalidInput) {
+		t.Errorf("no purpose: %v", err)
+	}
+	if err := e.svc.Bind(ctx, owner, agent, "missing", site, "traffic"); !errors.Is(err, cf.ErrNotFound) {
+		t.Errorf("missing connection: %v", err)
+	}
+	got := e.audit.types()
+	var changed int
+	for _, ty := range got {
+		if ty == cf.EventBindingChanged {
+			changed++
+		}
+	}
+	// Three binds (the repeat is recorded too) and two unbinds (so is the
+	// one with nothing to remove); a refusal is access.denied, not this.
+	if changed != 5 {
+		t.Fatalf("binding events: %d in %v", changed, got)
 	}
 }
