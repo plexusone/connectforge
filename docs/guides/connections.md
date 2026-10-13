@@ -74,6 +74,33 @@ your `Authorizer` and records an audit event.
 | `Rename` | `manage` | Changes the display name |
 | `Test` | `use` | Validates again and updates health and, for a permanent failure or a recovery, state |
 | `Disconnect` | `disconnect` | Marks the connection disconnected and destroys its credentials. The record stays, so the audit trail and bindings keep their reference |
+| `Reconnect` | `manage` | Replaces the credential, keeping the connection and everything bound to it. See below |
+| `Bindings` | `view` | Lists what depends on the connection, so a person can see what a disconnect would stop |
+| `Bind`, `Unbind` | `use` | Records, or removes, that a consumer depends on the connection for a purpose |
+
+### Reconnect
+
+A token expires, is revoked, or is rotated. `Reconnect` puts the connection
+right without creating a new one, so the features bound to it keep working:
+
+```go
+conn, err := svc.Reconnect(ctx, service.ReconnectInput{
+	Owner: owner, Actor: actor, ID: conn.ID,
+	Fields: map[string]cf.Secret{"token": cf.SecretString(newToken)},
+})
+```
+
+The new credential is validated with the provider **before** anything is
+stored, so a rejected one changes nothing. It must belong to the same account
+as the connection (`ErrAccountMismatch` otherwise): connecting another account
+is a new connection, so a feature never silently reads someone else's data.
+On success the connection is `connected` again with fresh health, and its
+credential has a new version.
+
+Reconnect also recovers a connection whose sealed credential can no longer be
+read, for example after a lost key ring: the new credential is sealed without
+opening the old one. A `disconnected` connection can be reconnected; a
+`revoked` one cannot.
 
 ### Test, in detail
 
@@ -103,6 +130,7 @@ A connection that is `disconnected` or `revoked` cannot be tested and returns
 | `ErrNotFound` | No such record for this owner. A record of another owner is also not found |
 | `ErrDenied` | The `Authorizer` refused |
 | `ErrNotUsable` | The connection's state does not allow it |
+| `ErrAccountMismatch` | A reconnect's credential belongs to a different account |
 | `ErrConflict` | Another writer changed it first; retry |
 | `ErrInvalidTransition` | The lifecycle forbids the change |
 | `ErrCredentialUnavailable` | The credential could not be read or decrypted. The connection is not used; there is no fallback |

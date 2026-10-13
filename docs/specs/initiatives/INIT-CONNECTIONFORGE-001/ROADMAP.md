@@ -65,9 +65,9 @@ agent-delegated authorization, and a remote service mode.
 
 - [ ] `RMI-CONNECTIONFORGE-016` Scheduled validation and health: stoppable scheduler, backoff, needs-attention transitions, overdue reporting
   - Depends on: `RMI-CONNECTIONFORGE-010`
-- [ ] `RMI-CONNECTIONFORGE-017` Credential replacement and rotation with two coexisting versions and validate-before-activate
+- [x] `RMI-CONNECTIONFORGE-017` Credential replacement and rotation with two coexisting versions and validate-before-activate
   - Depends on: `RMI-CONNECTIONFORGE-013`
-- [ ] `RMI-CONNECTIONFORGE-018` Grants and bindings: enforcement through the `Authorizer`, binding-aware disconnect
+- [ ] `RMI-CONNECTIONFORGE-018` Grants and bindings: enforcement through the `Authorizer`, binding-aware disconnect. Bindings are listed, bound and unbound through the service; grants are held by the host's authorization (SystemForge uses its resource grants), so what remains is a disconnect that requires acknowledging its bindings
   - Depends on: `RMI-CONNECTIONFORGE-010`
 - [ ] `RMI-CONNECTIONFORGE-019` Status model and metrics interface: states, health, expiring credentials, failing connections
   - Depends on: `RMI-CONNECTIONFORGE-016`

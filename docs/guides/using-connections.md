@@ -68,11 +68,18 @@ Record a **binding** when a feature starts depending on a connection, so a
 disconnect can show what would stop working:
 
 ```go
-err := store.PutBinding(ctx, cf.Binding{
-	Owner: owner, ConnectionID: id,
-	Consumer: cf.Consumer{Kind: "application", ID: "dashboards"},
-	Purpose:  "traffic",
-})
+err := svc.Bind(ctx, owner, actor, id,
+	cf.Consumer{Kind: "application", ID: "dashboards"}, "traffic")
 ```
 
-Bindings are idempotent, and deleting a connection removes them.
+Bindings are idempotent, and deleting a connection removes them. Through
+the service, `Bind` and `Unbind` require **use**, so whoever may use a
+connection may say that a feature depends on it, and `Bindings` lists them for
+anyone who may view it. Show that list before a disconnect:
+
+```go
+bs, err := svc.Bindings(ctx, owner, actor, id)
+// "Disconnecting stops: portfolio.site impactchiefs.com (traffic)"
+```
+
+A [reconnect](connections.md#reconnect) leaves bindings untouched.

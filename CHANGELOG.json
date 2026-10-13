@@ -9,6 +9,43 @@
   ],
   "releases": [
     {
+      "version": "v0.2.0",
+      "date": "2026-10-13",
+      "highlights": [
+        {
+          "description": "`Reconnect` replaces a connection's credential without creating a new connection, so what is bound to it keeps working; the new credential is validated first and must belong to the same account"
+        },
+        {
+          "description": "Bindings are managed through the service: `Bindings` lists what depends on a connection, and `Bind` and `Unbind` record it, so a disconnect can show what it would stop"
+        },
+        {
+          "description": "No breaking changes"
+        }
+      ],
+      "added": [
+        {
+          "description": "`service.Reconnect`: validates the new credential with the provider before storing anything, refuses one for a different account with `ErrAccountMismatch`, writes a new credential version, and returns the connection to `connected` with fresh health. It recovers a connection whose sealed credential can no longer be read, and revives a disconnected one",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-017"
+          ]
+        },
+        {
+          "description": "`service.Bindings`, `Bind` and `Unbind`, authorized as view, use and use, with a `binding.changed` audit event",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-018"
+          ]
+        },
+        {
+          "description": "`ErrAccountMismatch`"
+        }
+      ],
+      "documentation": [
+        {
+          "description": "The user guide covers reconnecting and bindings"
+        }
+      ]
+    },
+    {
       "version": "v0.1.0",
       "date": "2026-10-13",
       "highlights": [
