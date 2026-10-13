@@ -105,7 +105,10 @@
       ],
       "documentation": [
         {
-          "description": "PRD, TRD, plan and roadmap under `docs/specs/initiatives/INIT-CONNECTIONFORGE-001`, and agent guidance in `AGENTS.md`"
+          "description": "MkDocs site with a getting-started page and a user guide covering connections and their lifecycle, using a connection, writing a provider, integrating with a host, storage and security"
+        },
+        {
+          "description": "Release notes for v0.1.0, and PRD, TRD, plan and roadmap under `docs/specs/initiatives/INIT-CONNECTIONFORGE-001`, with agent guidance in `AGENTS.md`"
         }
       ]
     }
