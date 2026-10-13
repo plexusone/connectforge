@@ -274,6 +274,148 @@ func (s *Service) Disconnect(ctx context.Context, owner cf.OwnerID, actor cf.Pri
 	return c, s.audited(ctx, event(c, actor, cf.EventConnectionDisconnected, s.o.Clock.Now(), nil), nil)
 }
 
+// ReconnectInput is a replacement credential for an existing connection.
+type ReconnectInput struct {
+	Owner cf.OwnerID
+	Actor cf.Principal
+	ID    string
+	// Fields are the auth method's inputs, by field name, as for Create.
+	Fields map[string]cf.Secret
+}
+
+// Reconnect replaces a connection's credential with a new one, keeping the
+// connection, so what is bound to it keeps working. The new credential is
+// validated with the provider first; if it is rejected, or belongs to a
+// different account, nothing changes. On success the previous versions stay
+// until the connection's credentials are destroyed, the connection is
+// `connected` again with fresh health, and a connection that needed
+// attention, or was disconnected, is usable.
+//
+// It also recovers a connection whose sealed credential can no longer be
+// read, since the new one is sealed without opening the old.
+func (s *Service) Reconnect(ctx context.Context, in ReconnectInput) (cf.Connection, error) {
+	c, err := s.o.Store.GetConnection(ctx, in.Owner, in.ID)
+	if err != nil {
+		return cf.Connection{}, err
+	}
+	if err := s.allow(ctx, in.Actor, cf.ActionManage, c); err != nil {
+		return cf.Connection{}, err
+	}
+	if c.State == cf.StateRevoked {
+		return cf.Connection{}, fmt.Errorf("%w: %s is revoked", cf.ErrNotUsable, c.ID)
+	}
+	prov, err := s.o.Providers.Get(c.Provider)
+	if err != nil {
+		return cf.Connection{}, err
+	}
+	man := prov.Manifest()
+	method, ok := man.Method(c.AuthMethod)
+	if !ok {
+		return cf.Connection{}, fmt.Errorf("%w: %s has no auth method %q", ErrInvalidInput, c.Provider, c.AuthMethod)
+	}
+	if err := checkFields(method, in.Fields); err != nil {
+		return cf.Connection{}, err
+	}
+
+	m := provider.Material{Kind: c.AuthMethod, Fields: in.Fields}
+	hc, err := s.o.Broker.ProviderClient(man)
+	if err != nil {
+		return cf.Connection{}, err
+	}
+	res, verr := prov.Validate(ctx, hc, m)
+	now := s.o.Clock.Now()
+	if verr != nil {
+		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventCredentialReplaced, now, verr), verr)
+	}
+	if c.ExternalAccountID != "" && res.AccountID != "" && c.ExternalAccountID != res.AccountID {
+		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventCredentialReplaced, now, cf.ErrAccountMismatch), cf.ErrAccountMismatch)
+	}
+
+	active := 0
+	if cur, err := s.o.Store.ActiveCredential(ctx, in.Owner, in.ID); err == nil {
+		active = cur.Version
+	} else if !errors.Is(err, cf.ErrNotFound) {
+		return cf.Connection{}, err
+	}
+	cred, err := s.o.Broker.Seal(ctx, c, active+1, m)
+	if err != nil {
+		return cf.Connection{}, err
+	}
+	if err := s.o.Store.SwapCredential(ctx, active, cred); err != nil {
+		return cf.Connection{}, err
+	}
+
+	out, err := s.update(ctx, in.Owner, in.Actor, in.ID, cf.ActionManage, func(c *cf.Connection) error {
+		c.State = cf.StateConnected
+		c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK}
+		if res.AccountID != "" {
+			c.ExternalAccountID = res.AccountID
+		}
+		if res.AccountLabel != "" {
+			c.ExternalLabel = res.AccountLabel
+		}
+		if res.Scopes != nil {
+			c.Scopes = res.Scopes
+		}
+		return nil
+	})
+	if err != nil {
+		return cf.Connection{}, fmt.Errorf("service: the credential was replaced but the connection was not updated: %w", err)
+	}
+	return out, s.audited(ctx, event(out, in.Actor, cf.EventCredentialReplaced, now, nil), nil)
+}
+
+// Bindings lists what depends on a connection, so a person can see what a
+// disconnect would stop. It requires view.
+func (s *Service) Bindings(ctx context.Context, owner cf.OwnerID, actor cf.Principal, id string) ([]cf.Binding, error) {
+	c, err := s.o.Store.GetConnection(ctx, owner, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.allow(ctx, actor, cf.ActionView, c); err != nil {
+		return nil, err
+	}
+	return s.o.Store.ListBindings(ctx, owner, id)
+}
+
+// Bind records that a consumer uses a connection for a purpose. It is
+// idempotent and requires use: whoever may use a connection may say that a
+// feature depends on it.
+func (s *Service) Bind(ctx context.Context, owner cf.OwnerID, actor cf.Principal, id string, consumer cf.Consumer, purpose string) error {
+	return s.changeBinding(ctx, owner, actor, id, consumer, purpose, true)
+}
+
+// Unbind removes a binding. It requires use and is not an error when none
+// exists.
+func (s *Service) Unbind(ctx context.Context, owner cf.OwnerID, actor cf.Principal, id string, consumer cf.Consumer, purpose string) error {
+	return s.changeBinding(ctx, owner, actor, id, consumer, purpose, false)
+}
+
+func (s *Service) changeBinding(ctx context.Context, owner cf.OwnerID, actor cf.Principal, id string, consumer cf.Consumer, purpose string, add bool) error {
+	if consumer.Kind == "" || consumer.ID == "" || purpose == "" {
+		return fmt.Errorf("%w: a binding needs a consumer kind, a consumer ID and a purpose", ErrInvalidInput)
+	}
+	c, err := s.o.Store.GetConnection(ctx, owner, id)
+	if err != nil {
+		return err
+	}
+	if err := s.allow(ctx, actor, cf.ActionUse, c); err != nil {
+		return err
+	}
+	now := s.o.Clock.Now()
+	if add {
+		err = s.o.Store.PutBinding(ctx, cf.Binding{Owner: owner, ConnectionID: id, Consumer: consumer, Purpose: purpose, CreatedAt: now})
+	} else {
+		err = s.o.Store.RemoveBinding(ctx, owner, id, consumer, purpose)
+	}
+	if err != nil {
+		return err
+	}
+	e := event(c, actor, cf.EventBindingChanged, now, nil)
+	e.Details = map[string]string{"consumer": consumer.Kind + ":" + consumer.ID, "purpose": purpose, "bound": fmt.Sprint(add)}
+	return s.audited(ctx, e, nil)
+}
+
 // maxAttempts bounds retries of a compare-and-swap that lost a race.
 const maxAttempts = 3
 

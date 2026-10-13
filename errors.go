@@ -15,6 +15,11 @@ var (
 	// ErrInvalidTransition is returned for a lifecycle change the transition
 	// table does not allow.
 	ErrInvalidTransition = errors.New("connectionforge: invalid state transition")
+	// ErrAccountMismatch is returned when a new credential belongs to a
+	// different account than the connection was made for. Connecting another
+	// account is a new connection, so the features bound to this one never
+	// silently read someone else's data.
+	ErrAccountMismatch = errors.New("connectionforge: credential is for a different account")
 	// ErrLeaseHeld is returned when a lease is held by someone else.
 	ErrLeaseHeld = errors.New("connectionforge: lease held")
 )

@@ -123,6 +123,7 @@ const (
 	EventCredentialRefreshed    EventType = "credential.refreshed" //nolint:gosec // G101: Enum/constant identifier matches the credential-name heuristic, but the value is a public tag, not a secret
 	EventCredentialRevoked      EventType = "credential.revoked"   //nolint:gosec // G101: Enum/constant identifier matches the credential-name heuristic, but the value is a public tag, not a secret
 	EventGrantChanged           EventType = "grant.changed"
+	EventBindingChanged         EventType = "binding.changed"
 	EventAccessDenied           EventType = "access.denied"
 )
 

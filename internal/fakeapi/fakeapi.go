@@ -16,13 +16,19 @@ import (
 
 // Tokens with fixed behaviour. Any other token is rejected with 401.
 const (
-	Good      = "fake-good-token"
-	NoScope   = "fake-noscope-token"
-	Limited   = "fake-limited-token"
-	Broken    = "fake-broken-token"
-	NotJSON   = "fake-notjson-token"
-	AccountID = "acct-1"
-	Label     = "Acme Production"
+	Good = "fake-good-token"
+	// Rotated is a second valid token for the same account, as after a
+	// person rotates their token at the provider.
+	Rotated = "fake-rotated-token"
+	// OtherAccount is a valid token for a different account.
+	OtherAccount = "fake-other-account-token"
+	OtherID      = "acct-2"
+	NoScope      = "fake-noscope-token"
+	Limited      = "fake-limited-token"
+	Broken       = "fake-broken-token"
+	NotJSON      = "fake-notjson-token"
+	AccountID    = "acct-1"
+	Label        = "Acme Production"
 )
 
 // API is a running fake API.
@@ -84,14 +90,18 @@ func (a *API) serve(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "oops", http.StatusServiceUnavailable)
 	case tok == NotJSON:
 		_, _ = w.Write([]byte("hello")) //nolint:errcheck // test server: a failed write fails the client side
-	case tok != Good:
+	case tok != Good && tok != Rotated && tok != OtherAccount:
 		http.Error(w, "invalid token "+tok, http.StatusUnauthorized)
 	case r.URL.Path == "/verify":
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = fmt.Fprint(w, `{"result":{"id":"tok-1","status":"active","scopes":["zone:read","analytics:read"]}}`) //nolint:errcheck // as above
 	case r.URL.Path == "/accounts":
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = fmt.Fprintf(w, `{"result":[{"id":%q,"name":%q}]}`, AccountID, Label) //nolint:errcheck // as above
+		id, name := AccountID, Label
+		if tok == OtherAccount {
+			id, name = OtherID, "Someone Else"
+		}
+		_, _ = fmt.Fprintf(w, `{"result":[{"id":%q,"name":%q}]}`, id, name) //nolint:errcheck // as above
 	case r.URL.Path == "/data":
 		_, _ = w.Write([]byte("ok")) //nolint:errcheck // as above
 	default:
