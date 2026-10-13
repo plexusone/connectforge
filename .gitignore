@@ -1,0 +1,8 @@
+*.test
+*.out
+coverage.out
+.envrc
+.env
+.env.*
+!.env.example
+/connectionforge
