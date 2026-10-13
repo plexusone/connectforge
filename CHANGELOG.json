@@ -1,0 +1,113 @@
+{
+  "irVersion": "1.0",
+  "project": "connectionforge",
+  "repository": "https://github.com/plexusone/connectionforge",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": [
+    "plexusone"
+  ],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-10-13",
+      "highlights": [
+        {
+          "description": "Manage a tenant's connections to external services without handing callers a secret: a broker returns an authenticated `*http.Client` that provider SDKs accept, and credentials are sealed at rest"
+        },
+        {
+          "description": "Secrets cannot leak by construction: `Secret` prints as `[redacted]` in every format verb, JSON, text and `slog`, errors carry a status and a request ID but never a body, and a test confines `Reveal` to the broker and providers"
+        },
+        {
+          "description": "Ports and adapters: encryption, authorization, audit, leasing and deployment secrets are interfaces the host supplies, so the module imports no key manager, secret manager or application framework"
+        },
+        {
+          "description": "Ent-backed SQL store for SQLite and PostgreSQL that a host composes on its own database, with every owned table keyed on `owner_id` and a per-transaction hook for row-level security"
+        },
+        {
+          "description": "Not externally audited. Static API-token connections only; GitHub App, OAuth with refresh, and credential replacement follow"
+        }
+      ],
+      "added": [
+        {
+          "description": "Core model: `Connection`, versioned `Credential`, `Grant`, `Binding`, `Principal`, `Consumer` and `Use`, with a lifecycle (`pending`, `connected`, `needs_attention`, `disconnected`, `revoked`) kept separate from observed `Health`, and a transition table every store enforces",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-001",
+            "RMI-CONNECTIONFORGE-003"
+          ]
+        },
+        {
+          "description": "`Secret` type that redacts itself in `String`, `GoString`, `Format`, `MarshalJSON`, `MarshalText` and `slog`, copies on construction and `Reveal`, and can be cleared",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-002"
+          ]
+        },
+        {
+          "description": "Ports for stores, `Cryptographer`, `Authorizer`, `Auditor`, `Leaser` and `SecretSource`, with audit event types; credentials are sealed with additional data binding owner, connection and version",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-004",
+            "RMI-CONNECTIONFORGE-027"
+          ]
+        },
+        {
+          "description": "`store/memstore`, an in-memory store and leaser, and the `store/storetest` and `cryptotest` conformance suites covering owner isolation, compare-and-swap under concurrency, transitions, cascade on delete and leases",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-005"
+          ]
+        },
+        {
+          "description": "`sqlstore`: Ent-backed store and leaser for SQLite and PostgreSQL with `connectionforge_` tables, `owner_id` on every owned table, conditional updates and unique indexes that decide races, a host `TxHook`, and `Tables()` for the host's tenancy policy",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-026"
+          ]
+        },
+        {
+          "description": "`provider`: the provider interface, a declarative `Manifest` (fields, scopes, base URLs, help), a registry, versioned credential material, and `Classify`, which maps HTTP refusals to typed errors with the status and request ID",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-006"
+          ]
+        },
+        {
+          "description": "`provider/apikey`: a configurable static-token provider that sets the token header, verifies it against a manifest-named endpoint, and discovers the account and scopes from the response by path",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-007"
+          ]
+        },
+        {
+          "description": "`egress`: an HTTP client that allows only the manifest's hosts over HTTPS, refuses redirects to another host, and refuses private, loopback, link-local and shared addresses after DNS resolution",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-008"
+          ]
+        },
+        {
+          "description": "`broker`: `HTTPClient` checks authorization and state, unseals the credential once, and returns a client that authenticates a copy of each request; also `Seal`, `Unseal` and `ProviderClient`",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-009"
+          ]
+        },
+        {
+          "description": "`service`: `Create` (validates before storing anything), `Get`, `List`, `Rename`, `Test` and `Disconnect`, each authorized and audited, with a permanent failure moving a connection to `needs_attention` and a transient one changing only health",
+          "rmis": [
+            "RMI-CONNECTIONFORGE-010"
+          ]
+        }
+      ],
+      "security": [
+        {
+          "description": "Tokens are never present in a connection, an audit event or an error: a leak test pushes recognizable tokens through create, test and disconnect and checks every output"
+        },
+        {
+          "description": "A credential that cannot be read or decrypted makes a connection unusable; there is no fallback"
+        },
+        {
+          "description": "Every store method is scoped by owner, and a record of another owner is reported as not found"
+        }
+      ],
+      "documentation": [
+        {
+          "description": "PRD, TRD, plan and roadmap under `docs/specs/initiatives/INIT-CONNECTIONFORGE-001`, and agent guidance in `AGENTS.md`"
+        }
+      ]
+    }
+  ]
+}
