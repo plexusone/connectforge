@@ -104,7 +104,7 @@ authorization.
 | FR15 | Egress policy: provider endpoints come from the manifest, redirects are restricted, and private and link-local destinations are refused |
 | FR16 | Conformance suites for the stores, the cryptographer port and providers, with recorded fixtures for provider adapters |
 | FR17 | Rate-limit observation from provider responses, surfaced as health (later) |
-| FR18 | Bring-your-own-vault: reading a client secret or app key through a host `SecretSource` port (later) |
+| FR18 | Deployment secrets (OAuth client secrets, app keys) read through a host `SecretSource` port, never stored with per-owner credentials |
 
 ### Non-functional
 
@@ -136,7 +136,7 @@ authorization.
 
 ## Out of scope for v0.1.0
 
-The UI kit, rate-limit tracking, bring-your-own-vault, DPoP and mutual TLS,
+The UI kit, rate-limit tracking, DPoP and mutual TLS,
 agent-delegated authorization and any provider beyond the two reference
 implementations (an API-token provider and GitHub App). The model is designed
 so each fits without changing stored data.

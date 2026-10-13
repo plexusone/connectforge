@@ -77,10 +77,10 @@ type Connection struct {
     Scopes            []string          // granted, as reported by the provider
     State             State
     Health            Health            // observed, separate from State
-    CredentialVersion int               // active credential version
     Metadata          map[string]string // non-secret provider settings
     CreatedBy         Principal
     CreatedAt, UpdatedAt time.Time
+    Revision          uint64            // increases on every update; drives compare-and-swap
 }
 ```
 
@@ -109,8 +109,8 @@ pending ──authorize/validate──► connected ──► disconnected
 
 Transient failures (network, rate limit, provider outage) change `Health`,
 never `State`. The transition table lives in code, is the single source for
-the documentation and is enforced by the store through compare-and-swap on a
-version number.
+the documentation and is enforced by every store, which updates a connection
+only by compare-and-swap on its revision.
 
 ```go
 type Health struct {
@@ -118,41 +118,44 @@ type Health struct {
     LastValidation   Outcome   // ok, failed, unknown
     LastError        string    // classified, never containing a secret
     ConsecutiveFails int
-    RateLimit        *RateLimit
 }
 ```
+
+Rate-limit observations join `Health` when rate-limit tracking is added.
 
 ### Credential
 
 ```go
 type Credential struct {
+    Owner        OwnerID
     ConnectionID string
-    Version      int
+    Version      int        // 1, 2, ... one more per replacement or refresh
     Kind         string     // "api_token", "oauth_tokens", "app_installation"
-    Ciphertext   []byte     // opaque envelope produced by the Cryptographer
-    KeyRef       string     // purpose and key version recorded by the Cryptographer
+    Ciphertext   []byte     // self-describing envelope from the Cryptographer
     ExpiresAt    *time.Time // for the access token, if known
-    RefreshAfter *time.Time
     CreatedAt    time.Time
-    Superseded   *time.Time // set when a newer version is active
 }
 ```
 
 The plaintext structure for each `Kind` is private to its provider and
-sealed as a whole. Credentials are append-only by version; the active
-version is on the connection. During replacement two versions coexist until
-the new one validates.
+sealed as a whole. The ciphertext is a self-describing envelope, so it
+records which key version sealed it and needs no separate key reference.
+Credentials are append-only by version, and the credential store tracks the
+active version. Older versions are kept until the connection's credentials
+are destroyed, so a replacement can be validated before it is activated.
 
 ### Grants and bindings
 
 ```go
 type Grant struct {
+    Owner        OwnerID
     ConnectionID string
     Principal    Principal
     Actions      []Action // use, manage, share, disconnect
 }
 
 type Binding struct {
+    Owner        OwnerID
     ConnectionID string
     Consumer     Consumer // kind and id: application, workflow, agent
     Purpose      string   // e.g. "code-health"
@@ -169,37 +172,48 @@ implementation must scope by it.
 
 ```go
 type ConnectionStore interface {
-    Create(ctx context.Context, c Connection) error
-    Get(ctx context.Context, owner OwnerID, id string) (Connection, error)
-    List(ctx context.Context, owner OwnerID, f Filter) ([]Connection, error)
-    // CompareAndSwap updates iff stored UpdatedVersion == expect.
-    CompareAndSwap(ctx context.Context, c Connection, expect uint64) error
-    Delete(ctx context.Context, owner OwnerID, id string) error
+    CreateConnection(ctx context.Context, c Connection) (Connection, error) // revision 1; ErrExists
+    GetConnection(ctx context.Context, owner OwnerID, id string) (Connection, error)
+    ListConnections(ctx context.Context, owner OwnerID, f Filter) ([]Connection, error)
+    // UpdateConnection replaces c iff the stored revision equals c.Revision,
+    // else ErrConflict; a forbidden state change is ErrInvalidTransition.
+    UpdateConnection(ctx context.Context, c Connection) (Connection, error)
+    DeleteConnection(ctx context.Context, owner OwnerID, id string) error // cascades
 }
 
 type CredentialStore interface {
-    Put(ctx context.Context, owner OwnerID, cr Credential) error
-    // Active returns the active version's ciphertext only.
-    Active(ctx context.Context, owner OwnerID, connID string) (Credential, error)
-    // Swap installs next as active iff the active version is expectVersion.
-    Swap(ctx context.Context, owner OwnerID, connID string, expectVersion int, next Credential) error
-    Destroy(ctx context.Context, owner OwnerID, connID string) error
+    // SwapCredential installs next as active iff the active version is
+    // expectActive (0 for none) and next.Version == expectActive+1.
+    SwapCredential(ctx context.Context, expectActive int, next Credential) error
+    ActiveCredential(ctx context.Context, owner OwnerID, connID string) (Credential, error)
+    DestroyCredentials(ctx context.Context, owner OwnerID, connID string) error
 }
 
+// GrantStore and BindingStore put, remove and list by connection.
+// Store embeds all four, so one type can implement them.
+
 type Cryptographer interface {
-    Seal(ctx context.Context, purpose string, plaintext, aad []byte) (ciphertext []byte, keyRef string, err error)
-    Open(ctx context.Context, purpose string, ciphertext, aad []byte) (plaintext []byte, err error)
+    Seal(ctx context.Context, purpose string, plaintext, aad []byte) ([]byte, error)
+    Open(ctx context.Context, purpose string, ciphertext, aad []byte) ([]byte, error)
 }
 
 type Authorizer interface {
-    Allowed(ctx context.Context, p Principal, a Action, conn Connection) error
+    Allowed(ctx context.Context, p Principal, a Action, conn Connection) error // ErrDenied
 }
 
-type Auditor interface { Record(ctx context.Context, e Event) }
+type Auditor interface {
+    Record(ctx context.Context, e Event) error
+}
 
 type Leaser interface {
-    // Acquire returns a lease or ErrHeld. The lease is released or expires.
+    // Acquire returns a lease or ErrLeaseHeld. The lease is released or expires.
     Acquire(ctx context.Context, key string, ttl time.Duration) (Lease, error)
+}
+
+type SecretSource interface {
+    // Secret reads a deployment secret, such as an OAuth client secret or a
+    // GitHub App private key, from the host's secret manager.
+    Secret(ctx context.Context, ref string) (Secret, error)
 }
 ```
 
@@ -213,6 +227,11 @@ type Leaser interface {
   implementation is for tests.
 - **Authorizer** is called by `service` and by the broker. A failed
   authorization is an error, never a silent downgrade.
+- **Auditor** returns an error. An operation whose event cannot be recorded
+  reports it; it is never dropped silently.
+- **SecretSource** is how deployment secrets reach the library. A secret
+  manager (for example omnivault) implements it in the host. Per-owner
+  credentials never go through it: they are sealed and stored as above.
 
 ## The SQL store
 
@@ -264,8 +283,8 @@ func (Secret) LogValue() slog.Value         { return slog.StringValue("[redacted
 func (s Secret) Reveal() []byte             { return s.v } // narrow, grep-able
 ```
 
-- `Reveal` is called only inside provider adapters and the broker. A lint
-  rule in CI fails a call to `Reveal` anywhere else.
+- `Reveal` is called only inside provider adapters and the broker. A test
+  (`boundary_test.go`) fails on a call to `Reveal` anywhere else.
 - Errors from adapters are classified (`ErrInvalidCredential`,
   `ErrInsufficientScope`, `ErrTransient`, `ErrRateLimited`, ...) and carry
   the provider's status and request ID, never a request or response body that

@@ -8,22 +8,24 @@ stable IDs (`RMI-CONNECTIONFORGE-NNN`), are reviewed and executed by phase, and
 commits implementing one carry the trailer `Refs: RMI-CONNECTIONFORGE-<NNN>`.
 
 Later, not scheduled: the UI kit built on provider manifests, rate-limit
-tracking, bring-your-own-vault through a `SecretSource`, DPoP and mutual TLS,
+tracking, DPoP and mutual TLS,
 agent-delegated authorization, and a remote service mode.
 
 ## Phase 1 — Model, ports and secrets
 
 **Theme:** The types, lifecycle and ports are fixed, secrets cannot leak by construction, and in-memory stores pass a conformance suite.
 
-- [ ] `RMI-CONNECTIONFORGE-001` Core types: `Connection`, `Credential`, `Grant`, `Binding`, `Principal`, `Owner`, errors with classification
-- [ ] `RMI-CONNECTIONFORGE-002` `Secret` type with redaction in string, JSON, text and `slog`, and the `Reveal` lint rule
+- [x] `RMI-CONNECTIONFORGE-001` Core types: `Connection`, `Credential`, `Grant`, `Binding`, `Principal`, `Owner`, errors with classification
+- [x] `RMI-CONNECTIONFORGE-002` `Secret` type with redaction in string, JSON, text and `slog`, and a test that confines `Reveal` to the broker and providers
   - Depends on: `RMI-CONNECTIONFORGE-001`
-- [ ] `RMI-CONNECTIONFORGE-003` Lifecycle state machine and transition table, with state separate from observed health
+- [x] `RMI-CONNECTIONFORGE-003` Lifecycle state machine and transition table, with state separate from observed health
   - Depends on: `RMI-CONNECTIONFORGE-001`
-- [ ] `RMI-CONNECTIONFORGE-004` Port interfaces: stores, `Cryptographer`, `Authorizer`, `Auditor`, `Leaser`, and the audit event types
+- [x] `RMI-CONNECTIONFORGE-004` Port interfaces: stores, `Cryptographer`, `Authorizer`, `Auditor`, `Leaser`, and the audit event types
   - Depends on: `RMI-CONNECTIONFORGE-001`
-- [ ] `RMI-CONNECTIONFORGE-005` In-memory stores, test cryptographer and leaser, and the store and cryptographer conformance suites
+- [x] `RMI-CONNECTIONFORGE-005` In-memory stores, test cryptographer and leaser, and the store and cryptographer conformance suites
   - Depends on: `RMI-CONNECTIONFORGE-003`, `RMI-CONNECTIONFORGE-004`
+- [x] `RMI-CONNECTIONFORGE-027` `SecretSource` port for deployment secrets (OAuth client secrets, GitHub App keys), implemented by the host's secret manager
+  - Depends on: `RMI-CONNECTIONFORGE-002`
 
 ## Phase 2 — Static credentials and the broker
 
@@ -46,8 +48,8 @@ agent-delegated authorization, and a remote service mode.
 
 **Theme:** Two different credential models work end to end, and refresh is safe under concurrency.
 
-- [ ] `RMI-CONNECTIONFORGE-011` GitHub App provider: installation tokens from the host-held app key, token cache with expiry margin, permission and repository discovery
-  - Depends on: `RMI-CONNECTIONFORGE-009`
+- [ ] `RMI-CONNECTIONFORGE-011` GitHub App provider: installation tokens from the app key read through `SecretSource`, token cache with expiry margin, permission and repository discovery
+  - Depends on: `RMI-CONNECTIONFORGE-009`, `RMI-CONNECTIONFORGE-027`
 - [ ] `RMI-CONNECTIONFORGE-012` OAuth authorization code with PKCE: server-side single-use state, allow-listed return destinations, callback handling
   - Depends on: `RMI-CONNECTIONFORGE-010`
 - [ ] `RMI-CONNECTIONFORGE-013` Single-flight refresh: lease, compare-and-swap, atomic persistence of a rotated refresh token, failure classification
