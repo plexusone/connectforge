@@ -39,6 +39,8 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTIONFORGE-005`, `RMI-CONNECTIONFORGE-007`, `RMI-CONNECTIONFORGE-008`
 - [ ] `RMI-CONNECTIONFORGE-010` Service operations: create, test, rename, list, disconnect, with audit and leak tests
   - Depends on: `RMI-CONNECTIONFORGE-009`
+- [ ] `RMI-CONNECTIONFORGE-026` Ent-backed `sqlstore` for SQLite and PostgreSQL: prefixed tables, `owner_id` on every table, per-transaction host hook, conditional swaps, lease rows, `Tables()`; passes the conformance suite on both
+  - Depends on: `RMI-CONNECTIONFORGE-005`
 
 ## Phase 3 — GitHub App and OAuth
 
@@ -49,7 +51,7 @@ agent-delegated authorization, and a remote service mode.
 - [ ] `RMI-CONNECTIONFORGE-012` OAuth authorization code with PKCE: server-side single-use state, allow-listed return destinations, callback handling
   - Depends on: `RMI-CONNECTIONFORGE-010`
 - [ ] `RMI-CONNECTIONFORGE-013` Single-flight refresh: lease, compare-and-swap, atomic persistence of a rotated refresh token, failure classification
-  - Depends on: `RMI-CONNECTIONFORGE-012`
+  - Depends on: `RMI-CONNECTIONFORGE-012`, `RMI-CONNECTIONFORGE-026`
 - [ ] `RMI-CONNECTIONFORGE-014` Concurrency and race tests for refresh and installation-token minting
   - Depends on: `RMI-CONNECTIONFORGE-011`, `RMI-CONNECTIONFORGE-013`
 - [ ] `RMI-CONNECTIONFORGE-015` Reconnect and revoke flows, including provider-side revocation where supported

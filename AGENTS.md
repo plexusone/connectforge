@@ -28,8 +28,14 @@ code and the TRD disagree, resolve it in the TRD in the same change.
 - **Never log, return or audit a secret,** and never put a request or response
   body in an error.
 - **No host imports.** Do not import SystemForge, KeyForge, OmniVault or any
-  application framework. Storage, encryption, authorization, audit, leasing
-  and secret retrieval are ports; adapters live in the host.
+  application framework. Encryption, authorization, audit and secret
+  retrieval are ports; adapters live in the host.
+- **The schema is ours; tenancy policy is the host's.** `sqlstore` owns the
+  Ent schema, its generated code and migration. Ent and the database drivers
+  are imported by `sqlstore` only. Every table carries `owner_id`, every query
+  filters on it, and every transaction calls the host's hook first.
+- **Never hand-edit `sqlstore/ent`** outside `sqlstore/ent/schema`; run
+  `go generate ./sqlstore/...`.
 - **Tenant scope in every port.** A store method without an owner is a bug.
 - **State is not health.** A transient failure changes health, never state.
 - **Fail closed.** If decryption, authorization or validation cannot

@@ -116,7 +116,7 @@ authorization.
 | NFR4 | Library-first: HTTP handlers and a CLI are thin adapters over the library |
 | NFR5 | No import of any host framework, and no import of a key-management or secret-manager module in the core |
 | NFR6 | Public-ready repository and history from the first commit |
-| NFR7 | Works with SQLite or PostgreSQL through the host's store, without code changes |
+| NFR7 | Ships an Ent-backed store for SQLite and PostgreSQL that a host composes on its own database, applying its own tenancy policy; a host may still supply its own store |
 | NFR8 | Context-aware, cancellable operations; no goroutines that outlive the caller's context except a documented, stoppable scheduler |
 
 ## Success criteria

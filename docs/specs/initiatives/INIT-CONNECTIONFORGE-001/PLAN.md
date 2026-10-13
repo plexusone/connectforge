@@ -43,8 +43,9 @@ holds the work items and their status.
 
 ## Integration with a host
 
-connectionforge is a library. A host application (for example a platform that
-already owns tenancy, authorization and storage) supplies the ports and mounts
-the optional HTTP package. The host's key-management library implements
-`Cryptographer`; the host's authorization implements `Authorizer`. Those
-adapters live in the host, not here.
+connectionforge owns its domain, including its schema. A host application (for
+example a platform that already owns tenancy, authorization and storage) opens
+`sqlstore` on its own database, runs its migration, applies its tenancy policy
+to the tables it reports, supplies the remaining ports and mounts the optional
+HTTP package. The host's key-management library implements `Cryptographer` and
+its authorization implements `Authorizer`; those adapters live in the host.

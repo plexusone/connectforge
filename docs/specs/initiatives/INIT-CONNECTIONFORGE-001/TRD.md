@@ -49,13 +49,17 @@ connectionforge
 | `service` | Application operations over the ports | root, provider, broker |
 | `store/memstore` | In-memory stores for tests and examples | root |
 | `store/storetest` | Store conformance suite | root |
+| `sqlstore` | Ent-backed stores and leaser for SQLite and PostgreSQL, with migration | root, Ent, drivers |
+| `sqlstore/ent` | The Ent schema and generated code | Ent |
 | `egress` | Destination policy and an HTTP client factory | stdlib |
 | `httpapi` | Handlers over `service`, mounted by the host | service |
 | `cmd/connectionforge` | Thin CLI over `service` | service |
 
-An Ent-backed store is **not** in this module. The host owns its schema,
-migrations and row-level security, and implements the store ports; a
-reference schema is documented, not imported.
+connectionforge owns its domain, including its database schema. The host
+composes it: it opens `sqlstore` on its own database, runs its migration, and
+applies its tenancy policy (for example row-level security) to the tables
+`sqlstore` reports. Ent and the database drivers are imported by `sqlstore`
+only, so a host that brings its own store does not pull them in.
 
 ## Data model
 
@@ -209,6 +213,43 @@ type Leaser interface {
   implementation is for tests.
 - **Authorizer** is called by `service` and by the broker. A failed
   authorization is an error, never a silent downgrade.
+
+## The SQL store
+
+`sqlstore` implements `ConnectionStore`, `CredentialStore`, the grant and
+binding stores and `Leaser` over Ent, for SQLite and PostgreSQL. The memory
+store remains the reference for behaviour, and both run the same conformance
+suite.
+
+```go
+store, err := sqlstore.New(db, sqlstore.Postgres,
+    sqlstore.WithTxHook(func(ctx context.Context, tx *sql.Tx) error {
+        return setTenant(ctx, tx) // host-supplied, e.g. SET LOCAL for RLS
+    }))
+err = store.Migrate(ctx)
+tables := store.Tables() // for the host's tenancy policy
+```
+
+- **Own generated client.** The Ent schema and generated code live in
+  `sqlstore/ent`. The host does not regenerate or merge them into its own
+  client; it shares the database, not the code generation.
+- **Table names are prefixed** `connectionforge_`, so they cannot collide with
+  the host's.
+- **Tenant column.** Every table carries `owner_id` (text). Every query
+  filters on it in code; a host that enables row-level security keys its
+  policy on the same column, so isolation holds twice.
+- **Every operation runs in a transaction** and calls the host's `TxHook`
+  first, so session variables such as a tenant setting apply to it. A hook
+  error aborts the operation.
+- **Uniqueness and swaps are in the database.** One active credential version
+  per connection is a unique index; `Swap` and `CompareAndSwap` are
+  conditional updates whose affected-row count decides the outcome.
+- **Leases** are rows with an expiry, acquired by a conditional insert or
+  update, so refresh is single-flight across processes with no other
+  infrastructure.
+- **The schema is versioned** with the module. A change that alters stored
+  data needs a migration note in the changelog.
+- Ciphertext is stored as bytes; no column ever holds plaintext.
 
 ## Secrets
 
