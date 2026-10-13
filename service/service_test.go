@@ -1,0 +1,367 @@
+package service_test
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"sync"
+	"testing"
+
+	cf "github.com/plexusone/connectionforge"
+	"github.com/plexusone/connectionforge/broker"
+	"github.com/plexusone/connectionforge/cryptotest"
+	"github.com/plexusone/connectionforge/egress"
+	"github.com/plexusone/connectionforge/internal/fakeapi"
+	"github.com/plexusone/connectionforge/provider"
+	"github.com/plexusone/connectionforge/service"
+	"github.com/plexusone/connectionforge/store/memstore"
+)
+
+const owner cf.OwnerID = "org-a"
+
+var (
+	admin  = cf.Principal{Kind: cf.PrincipalUser, ID: "admin"}
+	member = cf.Principal{Kind: cf.PrincipalUser, ID: "member"}
+	agent  = cf.Principal{Kind: cf.PrincipalAgent, ID: "agent"}
+)
+
+// authz lets admin do anything, member view, and agent view and use.
+type authz struct{}
+
+func (authz) Allowed(_ context.Context, p cf.Principal, a cf.Action, _ cf.Connection) error {
+	switch {
+	case p == admin,
+		p == member && a == cf.ActionView,
+		p == agent && (a == cf.ActionView || a == cf.ActionUse):
+		return nil
+	}
+	return fmt.Errorf("%w: %s may not %s", cf.ErrDenied, p.ID, a)
+}
+
+type recorder struct {
+	mu     sync.Mutex
+	events []cf.Event
+	fail   error
+}
+
+func (r *recorder) Record(_ context.Context, e cf.Event) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.fail != nil {
+		return r.fail
+	}
+	r.events = append(r.events, e)
+	return nil
+}
+
+func (r *recorder) types() []cf.EventType {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var out []cf.EventType
+	for _, e := range r.events {
+		out = append(out, e.Type)
+	}
+	return out
+}
+
+type env struct {
+	api    *fakeapi.API
+	store  *memstore.Store
+	broker *broker.Broker
+	svc    *service.Service
+	audit  *recorder
+}
+
+func setup(t *testing.T) *env {
+	t.Helper()
+	api := fakeapi.Start(t)
+	reg := provider.NewRegistry()
+	if err := reg.Register(api.Provider(t)); err != nil {
+		t.Fatal(err)
+	}
+	e := &env{api: api, store: memstore.New(), audit: &recorder{}}
+	b, err := broker.New(broker.Options{
+		Store: e.store, Crypto: cryptotest.New(), Providers: reg, Authorizer: authz{}, Auditor: e.audit,
+		Egress: egress.Policy{AllowPrivate: true, Transport: api.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc, err := service.New(service.Options{Store: e.store, Broker: b, Providers: reg, Authorizer: authz{}, Auditor: e.audit})
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.broker, e.svc = b, svc
+	return e
+}
+
+func (e *env) create(t *testing.T, tok string) (cf.Connection, error) {
+	t.Helper()
+	return e.svc.Create(context.Background(), service.CreateInput{
+		Owner: owner, Actor: admin, Provider: "fakecdn", AuthMethod: "api_token",
+		Fields: map[string]cf.Secret{"token": cf.SecretString(tok)},
+	})
+}
+
+func TestCreateValidatesAndStoresSealed(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.State != cf.StateConnected || c.ExternalAccountID != fakeapi.AccountID || c.ExternalLabel != fakeapi.Label ||
+		c.DisplayName != "Fake CDN" || len(c.Scopes) != 2 || c.Health.LastValidation != cf.OutcomeOK || c.CreatedBy != admin {
+		t.Fatalf("connection: %+v", c)
+	}
+	cr, err := e.store.ActiveCredential(ctx, owner, c.ID)
+	if err != nil || cr.Version != 1 || bytes.Contains(cr.Ciphertext, []byte(fakeapi.Good)) {
+		t.Fatalf("credential: %v, %v", cr.Version, err)
+	}
+	if got := e.audit.types(); len(got) != 1 || got[0] != cf.EventConnectionCreated {
+		t.Fatalf("events: %v", got)
+	}
+}
+
+func TestCreateRefusals(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	if _, err := e.create(t, "wrong"); !errors.Is(err, cf.ErrInvalidCredential) {
+		t.Fatalf("rejected token: %v", err)
+	}
+	if list, err := e.store.ListConnections(ctx, owner, cf.Filter{}); err != nil || len(list) != 0 {
+		t.Fatalf("a rejected connection was stored: %v, %v", list, err)
+	}
+	if ev := e.audit.events[len(e.audit.events)-1]; ev.Success || ev.Type != cf.EventConnectionCreated {
+		t.Fatalf("failure not audited: %+v", ev)
+	}
+	_, err := e.svc.Create(ctx, service.CreateInput{
+		Owner: owner, Actor: member, Provider: "fakecdn", AuthMethod: "api_token",
+		Fields: map[string]cf.Secret{"token": cf.SecretString(fakeapi.Good)},
+	})
+	if !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("member created a connection: %v", err)
+	}
+	for name, in := range map[string]service.CreateInput{
+		"missing field": {Owner: owner, Actor: admin, Provider: "fakecdn", AuthMethod: "api_token"},
+		"unknown field": {Owner: owner, Actor: admin, Provider: "fakecdn", AuthMethod: "api_token",
+			Fields: map[string]cf.Secret{"token": cf.SecretString("x"), "extra": cf.SecretString("y")}},
+		"unknown method": {Owner: owner, Actor: admin, Provider: "fakecdn", AuthMethod: "oauth2"},
+	} {
+		if _, err := e.svc.Create(ctx, in); !errors.Is(err, service.ErrInvalidInput) {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+	if _, err := e.svc.Create(ctx, service.CreateInput{Provider: "nope"}); !errors.Is(err, provider.ErrUnknownProvider) {
+		t.Fatalf("unknown provider: %v", err)
+	}
+}
+
+func TestBrokerAuthenticatesRequests(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	use := cf.Use{Consumer: cf.Consumer{Kind: "application", ID: "dash"}, Purpose: "traffic"}
+	hc, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, use)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, e.api.URL+"/data", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := hc.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if cerr := resp.Body.Close(); cerr != nil {
+		t.Fatal(cerr)
+	}
+	if err != nil || resp.StatusCode != 200 || string(body) != "ok" {
+		t.Fatalf("authenticated request: %d %q %v", resp.StatusCode, body, err)
+	}
+	if req.Header.Get("Authorization") != "" {
+		t.Fatal("the broker modified the caller's request")
+	}
+	if seen := e.api.Seen(); len(seen) != 1 || seen[0] != "Bearer "+fakeapi.Good {
+		t.Fatalf("server saw %v", seen)
+	}
+	if _, err := hc.Get("https://api.example.com/data"); !errors.Is(err, egress.ErrRefused) {
+		t.Fatalf("request off the manifest's hosts: %v", err)
+	}
+	if _, err := e.broker.HTTPClient(ctx, owner, member, c.ID, use); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("member used a connection: %v", err)
+	}
+	if got := e.audit.types(); got[len(got)-1] != cf.EventAccessDenied {
+		t.Fatalf("refusal not audited: %v", got)
+	}
+}
+
+func TestTestTracksHealthAndState(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	e.api.Revoke(fakeapi.Good)
+	c, err = e.svc.Test(ctx, owner, agent, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.State != cf.StateNeedsAttention || c.Health.LastValidation != cf.OutcomeFailed || c.Health.ConsecutiveFails != 1 {
+		t.Fatalf("revoked upstream: %+v", c)
+	}
+	if strings.Contains(c.Health.LastError, fakeapi.Good) || !strings.Contains(c.Health.LastError, "req-123") {
+		t.Fatalf("last error: %q", c.Health.LastError)
+	}
+	if _, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, cf.Use{}); !errors.Is(err, cf.ErrNotUsable) {
+		t.Fatalf("used a connection that needs attention: %v", err)
+	}
+
+	e.api.Restore(fakeapi.Good)
+	if c, err = e.svc.Test(ctx, owner, agent, c.ID); err != nil || c.State != cf.StateConnected || c.Health.ConsecutiveFails != 0 {
+		t.Fatalf("restored: %+v, %v", c, err)
+	}
+}
+
+func TestTransientFailureChangesOnlyHealth(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Swap in a credential the API rate-limits, as if limits began.
+	cred, err := e.broker.Seal(ctx, c, 2, provider.Material{Kind: "api_token", Fields: map[string]cf.Secret{"token": cf.SecretString(fakeapi.Limited)}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.store.SwapCredential(ctx, 1, cred); err != nil {
+		t.Fatal(err)
+	}
+	c, err = e.svc.Test(ctx, owner, admin, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.State != cf.StateConnected || c.Health.LastValidation != cf.OutcomeFailed {
+		t.Fatalf("rate limited: %+v", c)
+	}
+}
+
+func TestDisconnectDestroysCredentials(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.svc.Disconnect(ctx, owner, member, c.ID); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("member disconnected: %v", err)
+	}
+	c, err = e.svc.Disconnect(ctx, owner, admin, c.ID)
+	if err != nil || c.State != cf.StateDisconnected {
+		t.Fatalf("disconnect: %+v, %v", c, err)
+	}
+	if _, err := e.store.ActiveCredential(ctx, owner, c.ID); !errors.Is(err, cf.ErrNotFound) {
+		t.Fatalf("credential survived: %v", err)
+	}
+	if _, err := e.broker.HTTPClient(ctx, owner, agent, c.ID, cf.Use{}); !errors.Is(err, cf.ErrNotUsable) {
+		t.Fatalf("used after disconnect: %v", err)
+	}
+	if _, err := e.svc.Test(ctx, owner, admin, c.ID); !errors.Is(err, cf.ErrNotUsable) {
+		t.Fatalf("tested after disconnect: %v", err)
+	}
+}
+
+func TestGetListRename(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.svc.Get(ctx, owner, member, c.ID); err != nil {
+		t.Fatalf("member view: %v", err)
+	}
+	stranger := cf.Principal{Kind: cf.PrincipalUser, ID: "stranger"}
+	if _, err := e.svc.Get(ctx, owner, stranger, c.ID); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("stranger view: %v", err)
+	}
+	if list, err := e.svc.List(ctx, owner, stranger, cf.Filter{}); err != nil || len(list) != 0 {
+		t.Fatalf("stranger list: %v, %v", list, err)
+	}
+	if list, err := e.svc.List(ctx, owner, member, cf.Filter{}); err != nil || len(list) != 1 {
+		t.Fatalf("member list: %v, %v", list, err)
+	}
+	if _, err := e.svc.Rename(ctx, owner, member, c.ID, "x"); !errors.Is(err, cf.ErrDenied) {
+		t.Fatalf("member rename: %v", err)
+	}
+	r, err := e.svc.Rename(ctx, owner, admin, c.ID, "Production")
+	if err != nil || r.DisplayName != "Production" || r.Revision != c.Revision+1 {
+		t.Fatalf("rename: %+v, %v", r, err)
+	}
+	if _, err := e.svc.Rename(ctx, owner, admin, c.ID, ""); !errors.Is(err, service.ErrInvalidInput) {
+		t.Fatalf("empty name: %v", err)
+	}
+}
+
+func TestAuditFailureIsReported(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.audit.fail = errors.New("audit store down")
+	r, err := e.svc.Rename(ctx, owner, admin, c.ID, "Renamed")
+	if !errors.Is(err, service.ErrNotAudited) || r.DisplayName != "Renamed" {
+		t.Fatalf("unaudited change: %+v, %v", r, err)
+	}
+}
+
+// TestNoSecretLeaks puts recognizable tokens through every path and checks
+// that none appears in a connection, an event or an error.
+func TestNoSecretLeaks(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	var outputs []string
+	add := func(v any) {
+		b, err := json.Marshal(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		outputs = append(outputs, string(b), fmt.Sprintf("%+v", v))
+	}
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	add(c)
+	_, err = e.create(t, "fake-secret-wrong-token")
+	outputs = append(outputs, err.Error())
+	e.api.Revoke(fakeapi.Good)
+	tested, err := e.svc.Test(ctx, owner, admin, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	add(tested)
+	add(e.audit.events)
+	for _, o := range outputs {
+		for _, tok := range []string{fakeapi.Good, "fake-secret-wrong-token"} {
+			if strings.Contains(o, tok) {
+				t.Fatalf("token leaked: %s", o)
+			}
+		}
+	}
+}
