@@ -119,9 +119,9 @@ const (
 	EventConnectionUpdated      EventType = "connection.updated"
 	EventConnectionDisconnected EventType = "connection.disconnected"
 	EventConnectionDeleted      EventType = "connection.deleted"
-	EventCredentialReplaced     EventType = "credential.replaced"
-	EventCredentialRefreshed    EventType = "credential.refreshed"
-	EventCredentialRevoked      EventType = "credential.revoked"
+	EventCredentialReplaced     EventType = "credential.replaced"  //nolint:gosec // G101: Enum/constant identifier matches the credential-name heuristic, but the value is a public tag, not a secret
+	EventCredentialRefreshed    EventType = "credential.refreshed" //nolint:gosec // G101: Enum/constant identifier matches the credential-name heuristic, but the value is a public tag, not a secret
+	EventCredentialRevoked      EventType = "credential.revoked"   //nolint:gosec // G101: Enum/constant identifier matches the credential-name heuristic, but the value is a public tag, not a secret
 	EventGrantChanged           EventType = "grant.changed"
 	EventAccessDenied           EventType = "access.denied"
 )

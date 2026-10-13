@@ -90,7 +90,7 @@ func (c *Cryptographer) Seal(ctx context.Context, purpose string, plaintext, aad
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return c.aead().Seal(nil, nil, plaintext, bind(purpose, aad)), nil
+	return c.aead().Seal(nil, nil, plaintext, bind(purpose, aad)), nil //nolint:gosec // G407: a nil nonce is the API of a random-nonce AEAD, which generates the nonce itself
 }
 
 // Open implements [cf.Cryptographer].
