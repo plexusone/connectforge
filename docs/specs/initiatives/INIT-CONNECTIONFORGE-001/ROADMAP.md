@@ -41,7 +41,7 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTIONFORGE-005`, `RMI-CONNECTIONFORGE-007`, `RMI-CONNECTIONFORGE-008`
 - [ ] `RMI-CONNECTIONFORGE-010` Service operations: create, test, rename, list, disconnect, with audit and leak tests
   - Depends on: `RMI-CONNECTIONFORGE-009`
-- [ ] `RMI-CONNECTIONFORGE-026` Ent-backed `sqlstore` for SQLite and PostgreSQL: prefixed tables, `owner_id` on every table, per-transaction host hook, conditional swaps, lease rows, `Tables()`; passes the conformance suite on both
+- [x] `RMI-CONNECTIONFORGE-026` Ent-backed `sqlstore` for SQLite and PostgreSQL: prefixed tables, `owner_id` on every table, per-transaction host hook, conditional swaps, lease rows, `Tables()`; passes the conformance suite on both
   - Depends on: `RMI-CONNECTIONFORGE-005`
 
 ## Phase 3 — GitHub App and OAuth

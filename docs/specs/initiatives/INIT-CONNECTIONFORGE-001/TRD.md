@@ -260,9 +260,17 @@ tables := store.Tables() // for the host's tenancy policy
 - **Every operation runs in a transaction** and calls the host's `TxHook`
   first, so session variables such as a tenant setting apply to it. A hook
   error aborts the operation.
-- **Uniqueness and swaps are in the database.** One active credential version
-  per connection is a unique index; `Swap` and `CompareAndSwap` are
-  conditional updates whose affected-row count decides the outcome.
+- **Uniqueness and swaps are in the database.** Credential versions are
+  unique per connection and the active version is the highest, so two
+  concurrent `SwapCredential` calls for the same version are decided by the
+  unique index. `UpdateConnection` is a conditional update on the revision,
+  and its affected-row count decides the outcome.
+- **The lease table has no owner.** Lease names (for example
+  `refresh:<connection>`) are not owned records, so `Tables()` leaves the
+  lease table out of the host's tenancy policy.
+- **No driver is imported.** The host opens the database with the driver it
+  already uses. A SQLite database needs foreign keys on (Ent requires it to
+  migrate) and one connection or immediate transactions, so writers queue.
 - **Leases** are rows with an expiry, acquired by a conditional insert or
   update, so refresh is single-flight across processes with no other
   infrastructure.

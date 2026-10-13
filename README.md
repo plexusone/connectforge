@@ -5,8 +5,8 @@ definitions, connections, encrypted credentials, grants and bindings, and a
 broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.
 
-> **Status:** in development: the model, ports and in-memory stores are
-> implemented; providers, the broker and the SQL store follow. See the
+> **Status:** in development: the model, ports, the in-memory store and the
+> SQL store are implemented; providers and the broker follow. See the
 > [specifications](docs/specs/initiatives/INIT-CONNECTIONFORGE-001/PRD.md).
 
 ## What it does
