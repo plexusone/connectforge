@@ -31,15 +31,15 @@ agent-delegated authorization, and a remote service mode.
 
 **Theme:** An API-token connection is created, validated, discovered and used through a broker that never returns the secret.
 
-- [ ] `RMI-CONNECTIONFORGE-006` `Provider` interface, optional capability interfaces, `Manifest` and provider registry
+- [x] `RMI-CONNECTIONFORGE-006` `Provider` interface, optional capability interfaces, `Manifest` and provider registry
   - Depends on: `RMI-CONNECTIONFORGE-004`
-- [ ] `RMI-CONNECTIONFORGE-007` Manifest-driven static-token provider: validation endpoint, status classification, account discovery by path
+- [x] `RMI-CONNECTIONFORGE-007` Manifest-driven static-token provider: validation endpoint, status classification, account discovery by path
   - Depends on: `RMI-CONNECTIONFORGE-006`
-- [ ] `RMI-CONNECTIONFORGE-008` `egress` package: manifest host allow-list, redirect restriction, private-address refusal, HTTP client factory
+- [x] `RMI-CONNECTIONFORGE-008` `egress` package: manifest host allow-list, redirect restriction, private-address refusal, HTTP client factory
   - Depends on: `RMI-CONNECTIONFORGE-006`
-- [ ] `RMI-CONNECTIONFORGE-009` Broker: authenticated `http.Client`, per-call authorization and state checks, use counters
+- [x] `RMI-CONNECTIONFORGE-009` Broker: authenticated `http.Client`, per-call authorization and state checks, use counters
   - Depends on: `RMI-CONNECTIONFORGE-005`, `RMI-CONNECTIONFORGE-007`, `RMI-CONNECTIONFORGE-008`
-- [ ] `RMI-CONNECTIONFORGE-010` Service operations: create, test, rename, list, disconnect, with audit and leak tests
+- [x] `RMI-CONNECTIONFORGE-010` Service operations: create, test, rename, list, disconnect, with audit and leak tests
   - Depends on: `RMI-CONNECTIONFORGE-009`
 - [x] `RMI-CONNECTIONFORGE-026` Ent-backed `sqlstore` for SQLite and PostgreSQL: prefixed tables, `owner_id` on every table, per-transaction host hook, conditional swaps, lease rows, `Tables()`; passes the conformance suite on both
   - Depends on: `RMI-CONNECTIONFORGE-005`

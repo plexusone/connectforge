@@ -5,8 +5,9 @@ definitions, connections, encrypted credentials, grants and bindings, and a
 broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.
 
-> **Status:** in development: the model, ports, the in-memory store and the
-> SQL store are implemented; providers and the broker follow. See the
+> **Status:** in development. Static-token connections work end to end:
+> the model, the in-memory and SQL stores, the egress policy, the broker and
+> the service. GitHub App and OAuth follow. See the
 > [specifications](docs/specs/initiatives/INIT-CONNECTIONFORGE-001/PRD.md).
 
 ## What it does

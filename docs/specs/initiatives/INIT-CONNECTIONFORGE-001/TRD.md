@@ -304,19 +304,28 @@ func (s Secret) Reveal() []byte             { return s.v } // narrow, grep-able
 ```go
 type Provider interface {
     Manifest() Manifest
-    // Validate checks the credential and returns discovered account details.
-    Validate(ctx context.Context, c Material) (Validation, error)
+    // Validate checks the credential with the provider, using an HTTP client
+    // the caller restricted to the manifest's hosts, and returns the account.
+    Validate(ctx context.Context, hc *http.Client, m Material) (Result, error)
+    // Authenticate adds the credential to the caller's copy of a request.
+    Authenticate(r *http.Request, m Material) error
 }
 
-// Optional capabilities, discovered by type assertion.
-type Refresher     interface { Refresh(ctx context.Context, c Material) (Material, error) }
-type Revoker       interface { Revoke(ctx context.Context, c Material) error }
-type Discoverer    interface { Accounts(ctx context.Context, c Material) ([]Account, error) }
-type Authenticator interface { Authenticate(ctx context.Context, c Material, r *http.Request) error }
+// Optional capabilities, discovered by type assertion (later phases).
+type Refresher  interface { Refresh(ctx context.Context, hc *http.Client, m Material) (Material, error) }
+type Revoker    interface { Revoke(ctx context.Context, hc *http.Client, m Material) error }
+type Discoverer interface { Accounts(ctx context.Context, hc *http.Client, m Material) ([]Account, error) }
 ```
 
 `Material` is the unsealed credential handed to an adapter inside the
-broker. Refresh and revoke are optional because static keys do not support
+broker: a kind, its fields as `Secret` values, and an expiry. It is encoded
+for sealing by the `provider` package, versioned, with field values as bytes
+so they can be cleared. A provider never makes its own HTTP client; it uses
+the one it is given, so egress policy applies to validation as well as use.
+Adapters classify a refusal with `provider.Classify`: 401 and other 4xx are
+an invalid credential, 403 an insufficient scope, 429 rate limiting and 5xx
+transient; the error carries the status and the provider's request ID, never
+a body. Refresh and revoke are optional because static keys do not support
 them; the broker and the service check the capability and degrade
 explicitly (a non-refreshing connection that expires moves to
 `needs_attention`).
@@ -404,11 +413,14 @@ type Broker interface {
 }
 ```
 
-- Authorization (`use`) and state are checked on every call, and the
-  `Use` (consumer and purpose) is recorded as a counter, not an event per
-  request.
-- The returned transport authenticates each request lazily, so a refresh
-  happens in the transport, not at client creation.
+- Authorization (`use`) and state are checked each time a client is made,
+  and the `Use` (consumer and purpose) is reported to an optional `OnUse`
+  hook for counters, not recorded as an event per request. A refusal is
+  audited.
+- The credential is unsealed once, when the client is made, and the
+  transport adds it to a copy of each request. A caller makes a client per
+  unit of work, so a disconnect or a replaced credential applies to the next
+  client. Refresh (phase 3) happens when a client is made, under the lease.
 - The client is wrapped by `egress`: a request whose host is not in the
   provider's manifest `baseUrls` is refused, redirects to another host are
   refused, and resolved private, loopback and link-local addresses are
@@ -416,6 +428,23 @@ type Broker interface {
 - The result is an `*http.Client` a provider SDK can accept
   (`WithHTTPClient`), which is how SDKs consume a connection without
   connectionforge importing them.
+
+## Service
+
+`service` runs the operations a host exposes. Each authorizes through the
+host's `Authorizer`, audits, and retries a lost compare-and-swap a bounded
+number of times.
+
+| Operation | Action | Behaviour |
+|---|---|---|
+| `Create` | `manage` | Checks fields against the manifest, validates with the provider, and stores the connection and its sealed credential only if the provider accepts it |
+| `Get`, `List` | `view` | `List` returns only the connections the actor may view |
+| `Rename` | `manage` | Changes the display name |
+| `Test` | `use` | Validates again; the outcome goes to health. A permanent failure moves the connection to `needs_attention`, success back to `connected`, a transient failure changes only health |
+| `Disconnect` | `disconnect` | Marks it disconnected and destroys its credentials; the record stays |
+
+An audit failure after a successful change returns `ErrNotAudited`: the change
+was made and the gap in the trail is reported, not hidden.
 
 ## Audit
 
