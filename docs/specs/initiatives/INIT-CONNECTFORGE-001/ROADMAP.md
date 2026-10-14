@@ -58,6 +58,7 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTFORGE-011`, `RMI-CONNECTFORGE-013`
 - [ ] `RMI-CONNECTFORGE-015` Reconnect and revoke flows, including provider-side revocation where supported
   - Depends on: `RMI-CONNECTFORGE-013`
+  - Note: reconnect shipped in v0.2.0 (`Service.Reconnect`); provider-side revocation remains
 
 ## Phase 4 — Operations
 
@@ -81,11 +82,12 @@ agent-delegated authorization, and a remote service mode.
 
 - [ ] `RMI-CONNECTFORGE-021` `httpapi` handlers over the service, with no secret in any response and the host's authorizer applied
   - Depends on: `RMI-CONNECTFORGE-018`
+  - Note: SystemForge serves the connections API over the service itself; keep only if a host without its own API needs one
 - [ ] `RMI-CONNECTFORGE-022` CLI (`providers`, `connections`, `test`, `disconnect`) over the service
   - Depends on: `RMI-CONNECTFORGE-019`
-- [ ] `RMI-CONNECTFORGE-023` Documentation: getting started, host integration guide (ports and a reference schema), provider authoring, threat model
+- [x] `RMI-CONNECTFORGE-023` Documentation: getting started, host integration guide (ports and a reference schema), provider authoring, threat model
   - Depends on: `RMI-CONNECTFORGE-021`
-- [ ] `RMI-CONNECTFORGE-024` Internal review of broker, refresh and egress; fix findings; record known limitations
+- [x] `RMI-CONNECTFORGE-024` Internal review of broker, refresh and egress; fix findings; record known limitations
   - Depends on: `RMI-CONNECTFORGE-014`, `RMI-CONNECTFORGE-020`
-- [ ] `RMI-CONNECTFORGE-025` v0.1.0 release: changelog, release notes, signed tag after CI on all platforms
+- [x] `RMI-CONNECTFORGE-025` v0.1.0 release: changelog, release notes, signed tag after CI on all platforms
   - Depends on: `RMI-CONNECTFORGE-022`, `RMI-CONNECTFORGE-023`, `RMI-CONNECTFORGE-024`
