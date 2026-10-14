@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/predicate"
+	"github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/predicate"
 )
 
 // ConnectionUpdate is the builder for updating Connection entities.
@@ -119,13 +119,13 @@ func (_u *ConnectionUpdate) SetNillableState(v *string) *ConnectionUpdate {
 }
 
 // SetHealth sets the "health" field.
-func (_u *ConnectionUpdate) SetHealth(v connectionforge.Health) *ConnectionUpdate {
+func (_u *ConnectionUpdate) SetHealth(v connectforge.Health) *ConnectionUpdate {
 	_u.mutation.SetHealth(v)
 	return _u
 }
 
 // SetNillableHealth sets the "health" field if the given value is not nil.
-func (_u *ConnectionUpdate) SetNillableHealth(v *connectionforge.Health) *ConnectionUpdate {
+func (_u *ConnectionUpdate) SetNillableHealth(v *connectforge.Health) *ConnectionUpdate {
 	if v != nil {
 		_u.SetHealth(*v)
 	}
@@ -407,13 +407,13 @@ func (_u *ConnectionUpdateOne) SetNillableState(v *string) *ConnectionUpdateOne 
 }
 
 // SetHealth sets the "health" field.
-func (_u *ConnectionUpdateOne) SetHealth(v connectionforge.Health) *ConnectionUpdateOne {
+func (_u *ConnectionUpdateOne) SetHealth(v connectforge.Health) *ConnectionUpdateOne {
 	_u.mutation.SetHealth(v)
 	return _u
 }
 
 // SetNillableHealth sets the "health" field if the given value is not nil.
-func (_u *ConnectionUpdateOne) SetNillableHealth(v *connectionforge.Health) *ConnectionUpdateOne {
+func (_u *ConnectionUpdateOne) SetNillableHealth(v *connectforge.Health) *ConnectionUpdateOne {
 	if v != nil {
 		_u.SetHealth(*v)
 	}

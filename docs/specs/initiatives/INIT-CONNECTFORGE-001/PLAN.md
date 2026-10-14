@@ -1,7 +1,7 @@
-# connectionforge: Plan
+# connectforge: Plan
 
-**Initiative:** `INIT-CONNECTIONFORGE-001`
-**Repository:** `github.com/plexusone/connectionforge`
+**Initiative:** `INIT-CONNECTFORGE-001`
+**Repository:** `github.com/plexusone/connectforge`
 
 Implements the [PRD](PRD.md) and [TRD](TRD.md). The [roadmap](ROADMAP.md)
 holds the work items and their status.
@@ -43,7 +43,7 @@ holds the work items and their status.
 
 ## Integration with a host
 
-connectionforge owns its domain, including its schema. A host application (for
+connectforge owns its domain, including its schema. A host application (for
 example a platform that already owns tenancy, authorization and storage) opens
 `sqlstore` on its own database, runs its migration, applies its tenancy policy
 to the tables it reports, supplies the remaining ports and mounts the optional

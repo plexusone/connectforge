@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
 )
 
 // Grant is the model entity for the Grant schema.

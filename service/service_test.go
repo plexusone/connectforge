@@ -13,14 +13,14 @@ import (
 	"sync"
 	"testing"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/broker"
-	"github.com/plexusone/connectionforge/cryptotest"
-	"github.com/plexusone/connectionforge/egress"
-	"github.com/plexusone/connectionforge/internal/fakeapi"
-	"github.com/plexusone/connectionforge/provider"
-	"github.com/plexusone/connectionforge/service"
-	"github.com/plexusone/connectionforge/store/memstore"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/broker"
+	"github.com/plexusone/connectforge/cryptotest"
+	"github.com/plexusone/connectforge/egress"
+	"github.com/plexusone/connectforge/internal/fakeapi"
+	"github.com/plexusone/connectforge/provider"
+	"github.com/plexusone/connectforge/service"
+	"github.com/plexusone/connectforge/store/memstore"
 )
 
 const owner cf.OwnerID = "org-a"

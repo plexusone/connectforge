@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
 )
 
 // Lease is the model entity for the Lease schema.

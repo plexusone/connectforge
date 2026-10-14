@@ -26,7 +26,7 @@ const (
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// Table holds the table name of the credential in the database.
-	Table = "connectionforge_credentials"
+	Table = "connectforge_credentials"
 )
 
 // Columns holds all SQL columns for credential fields.

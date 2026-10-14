@@ -19,7 +19,7 @@ type Provider interface {
 	Manifest() Manifest
 	// Validate checks the credential with the provider, using hc, which the
 	// caller has restricted to the manifest's hosts, and returns the account
-	// it belongs to. A rejection wraps a connectionforge provider error.
+	// it belongs to. A rejection wraps a connectforge provider error.
 	Validate(ctx context.Context, hc *http.Client, m Material) (Result, error)
 	// Authenticate adds the credential to an outgoing request. The request
 	// is the caller's copy.

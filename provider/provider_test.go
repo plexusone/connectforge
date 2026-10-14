@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/provider"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/provider"
 )
 
 func manifest(key string) provider.Manifest {

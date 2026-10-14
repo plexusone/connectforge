@@ -1,4 +1,4 @@
-package connectionforge
+package connectforge
 
 import (
 	"maps"
@@ -132,14 +132,14 @@ func (c Credential) Clone() Credential {
 }
 
 // CredentialPurpose is the purpose under which credentials are sealed.
-const CredentialPurpose = "connectionforge.credential"
+const CredentialPurpose = "connectforge.credential"
 
 // CredentialAAD returns the additional data a credential is sealed with. It
 // binds the ciphertext to its owner, connection and version, so it cannot be
 // moved to another record.
 func CredentialAAD(owner OwnerID, connectionID string, version int) []byte {
 	b := make([]byte, 0, len(owner)+len(connectionID)+24)
-	b = append(b, "connectionforge/v1\x00"...)
+	b = append(b, "connectforge/v1\x00"...)
 	b = append(b, owner...)
 	b = append(b, 0)
 	b = append(b, connectionID...)

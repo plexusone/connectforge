@@ -1,7 +1,7 @@
-# connectionforge: Product Requirements
+# connectforge: Product Requirements
 
-**Initiative:** `INIT-CONNECTIONFORGE-001`
-**Repository:** `github.com/plexusone/connectionforge`
+**Initiative:** `INIT-CONNECTFORGE-001`
+**Repository:** `github.com/plexusone/connectforge`
 
 ## Problem
 
@@ -36,7 +36,7 @@ authorization.
 1. **One model for every external connection**: provider, connection,
    credential, grant, binding, with a single lifecycle.
 2. **Own the credential lifecycle, not the API clients.** Provider SDKs stay
-   in their own modules; connectionforge supplies an authenticated transport,
+   in their own modules; connectforge supplies an authenticated transport,
    validation and status.
 3. **Secrets stay server-side and out of normal paths.** Callers receive
    metadata and an authenticated HTTP client, not raw tokens; secrets are
@@ -58,7 +58,7 @@ authorization.
 
 ## Non-goals
 
-- Provider API clients. connectionforge does not wrap the GitHub, Cloudflare
+- Provider API clients. connectforge does not wrap the GitHub, Cloudflare
   or Stripe APIs.
 - Cryptography. Encryption is a port; a key-management library implements it.
 - A secret manager. Retrieving bootstrap secrets (client secrets, an app
@@ -144,7 +144,7 @@ so each fits without changing stored data.
 ## Open questions
 
 - Whether the HTTP handlers live in this module or in the host. The default
-  is a small `connectionforge/httpapi` package that a host may mount or
+  is a small `connectforge/httpapi` package that a host may mount or
   ignore.
 - Whether usage events are recorded individually or as counters per
   connection per period.

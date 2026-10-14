@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 // Material is a credential's plaintext, as a provider adapter sees it. It

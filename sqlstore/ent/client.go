@@ -9,16 +9,16 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/plexusone/connectionforge/sqlstore/ent/migrate"
+	"github.com/plexusone/connectforge/sqlstore/ent/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
 )
 
 // Client is the client that holds all ent builders.

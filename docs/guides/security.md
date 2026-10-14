@@ -1,9 +1,9 @@
 # Security
 
 !!! warning "Not externally audited"
-    connectionforge has had internal review only. It handles credentials that
+    connectforge has had internal review only. It handles credentials that
     can expose a customer's data, so read this page and the
-    [technical design](../specs/initiatives/INIT-CONNECTIONFORGE-001/TRD.md)
+    [technical design](../specs/initiatives/INIT-CONNECTFORGE-001/TRD.md)
     before relying on it.
 
 ## What it protects
@@ -50,7 +50,7 @@ module is built so that:
 
 ## Secrets in your own code
 
-- Hold credentials as `connectionforge.Secret` from the moment you receive
+- Hold credentials as `connectforge.Secret` from the moment you receive
   them, and never convert to `string` except at the last moment a provider
   needs it.
 - Do not log a request body from a provider call.

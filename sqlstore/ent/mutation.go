@@ -11,13 +11,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
-	"github.com/plexusone/connectionforge/sqlstore/ent/predicate"
+	"github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/predicate"
 )
 
 const (
@@ -648,7 +648,7 @@ type ConnectionMutation struct {
 	scopes              *[]string
 	appendscopes        []string
 	state               *string
-	health              *connectionforge.Health
+	health              *connectforge.Health
 	metadata            *map[string]string
 	created_by_kind     *string
 	created_by_id       *string
@@ -1114,12 +1114,12 @@ func (m *ConnectionMutation) ResetState() {
 }
 
 // SetHealth sets the "health" field.
-func (m *ConnectionMutation) SetHealth(c connectionforge.Health) {
+func (m *ConnectionMutation) SetHealth(c connectforge.Health) {
 	m.health = &c
 }
 
 // Health returns the value of the "health" field in the mutation.
-func (m *ConnectionMutation) Health() (r connectionforge.Health, exists bool) {
+func (m *ConnectionMutation) Health() (r connectforge.Health, exists bool) {
 	v := m.health
 	if v == nil {
 		return
@@ -1130,7 +1130,7 @@ func (m *ConnectionMutation) Health() (r connectionforge.Health, exists bool) {
 // OldHealth returns the old "health" field's value of the Connection entity.
 // If the Connection object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ConnectionMutation) OldHealth(ctx context.Context) (v connectionforge.Health, err error) {
+func (m *ConnectionMutation) OldHealth(ctx context.Context) (v connectforge.Health, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHealth is only allowed on UpdateOne operations")
 	}
@@ -1635,7 +1635,7 @@ func (m *ConnectionMutation) SetField(name string, value ent.Value) error {
 		m.SetState(v)
 		return nil
 	case connection.FieldHealth:
-		v, ok := value.(connectionforge.Health)
+		v, ok := value.(connectforge.Health)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

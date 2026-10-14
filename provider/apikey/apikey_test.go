@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/internal/fakeapi"
-	"github.com/plexusone/connectionforge/provider"
-	"github.com/plexusone/connectionforge/provider/apikey"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/internal/fakeapi"
+	"github.com/plexusone/connectforge/provider"
+	"github.com/plexusone/connectforge/provider/apikey"
 )
 
 func material(tok string) provider.Material {

@@ -1,11 +1,11 @@
-package connectionforge_test
+package connectforge_test
 
 import (
 	"bytes"
 	"errors"
 	"testing"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 func TestTransitionTable(t *testing.T) {

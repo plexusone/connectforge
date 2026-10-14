@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/plexusone/connectionforge/sqlstore/ent"
+	"github.com/plexusone/connectforge/sqlstore/ent"
 )
 
 // The BindingFunc type is an adapter to allow the use of ordinary

@@ -1,4 +1,4 @@
-// Package service holds connectionforge's operations: create, get, list,
+// Package service holds connectforge's operations: create, get, list,
 // rename, test and disconnect. Each checks authorization through the host's
 // [cf.Authorizer] and records an audit event.
 package service
@@ -11,9 +11,9 @@ import (
 	"maps"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/broker"
-	"github.com/plexusone/connectionforge/provider"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/broker"
+	"github.com/plexusone/connectforge/provider"
 )
 
 // ErrNotAudited wraps an audit failure after an operation succeeded: the

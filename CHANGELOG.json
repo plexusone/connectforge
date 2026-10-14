@@ -1,7 +1,7 @@
 {
   "irVersion": "1.0",
-  "project": "connectionforge",
-  "repository": "https://github.com/plexusone/connectionforge",
+  "project": "connectforge",
+  "repository": "https://github.com/plexusone/connectforge",
   "versioning": "semver",
   "commitConvention": "conventional",
   "maintainers": [
@@ -26,13 +26,13 @@
         {
           "description": "`service.Reconnect`: validates the new credential with the provider before storing anything, refuses one for a different account with `ErrAccountMismatch`, writes a new credential version, and returns the connection to `connected` with fresh health. It recovers a connection whose sealed credential can no longer be read, and revives a disconnected one",
           "rmis": [
-            "RMI-CONNECTIONFORGE-017"
+            "RMI-CONNECTFORGE-017"
           ]
         },
         {
           "description": "`service.Bindings`, `Bind` and `Unbind`, authorized as view, use and use, with a `binding.changed` audit event",
           "rmis": [
-            "RMI-CONNECTIONFORGE-018"
+            "RMI-CONNECTFORGE-018"
           ]
         },
         {
@@ -69,63 +69,63 @@
         {
           "description": "Core model: `Connection`, versioned `Credential`, `Grant`, `Binding`, `Principal`, `Consumer` and `Use`, with a lifecycle (`pending`, `connected`, `needs_attention`, `disconnected`, `revoked`) kept separate from observed `Health`, and a transition table every store enforces",
           "rmis": [
-            "RMI-CONNECTIONFORGE-001",
-            "RMI-CONNECTIONFORGE-003"
+            "RMI-CONNECTFORGE-001",
+            "RMI-CONNECTFORGE-003"
           ]
         },
         {
           "description": "`Secret` type that redacts itself in `String`, `GoString`, `Format`, `MarshalJSON`, `MarshalText` and `slog`, copies on construction and `Reveal`, and can be cleared",
           "rmis": [
-            "RMI-CONNECTIONFORGE-002"
+            "RMI-CONNECTFORGE-002"
           ]
         },
         {
           "description": "Ports for stores, `Cryptographer`, `Authorizer`, `Auditor`, `Leaser` and `SecretSource`, with audit event types; credentials are sealed with additional data binding owner, connection and version",
           "rmis": [
-            "RMI-CONNECTIONFORGE-004",
-            "RMI-CONNECTIONFORGE-027"
+            "RMI-CONNECTFORGE-004",
+            "RMI-CONNECTFORGE-027"
           ]
         },
         {
           "description": "`store/memstore`, an in-memory store and leaser, and the `store/storetest` and `cryptotest` conformance suites covering owner isolation, compare-and-swap under concurrency, transitions, cascade on delete and leases",
           "rmis": [
-            "RMI-CONNECTIONFORGE-005"
+            "RMI-CONNECTFORGE-005"
           ]
         },
         {
-          "description": "`sqlstore`: Ent-backed store and leaser for SQLite and PostgreSQL with `connectionforge_` tables, `owner_id` on every owned table, conditional updates and unique indexes that decide races, a host `TxHook`, and `Tables()` for the host's tenancy policy",
+          "description": "`sqlstore`: Ent-backed store and leaser for SQLite and PostgreSQL with `connectforge_` tables, `owner_id` on every owned table, conditional updates and unique indexes that decide races, a host `TxHook`, and `Tables()` for the host's tenancy policy",
           "rmis": [
-            "RMI-CONNECTIONFORGE-026"
+            "RMI-CONNECTFORGE-026"
           ]
         },
         {
           "description": "`provider`: the provider interface, a declarative `Manifest` (fields, scopes, base URLs, help), a registry, versioned credential material, and `Classify`, which maps HTTP refusals to typed errors with the status and request ID",
           "rmis": [
-            "RMI-CONNECTIONFORGE-006"
+            "RMI-CONNECTFORGE-006"
           ]
         },
         {
           "description": "`provider/apikey`: a configurable static-token provider that sets the token header, verifies it against a manifest-named endpoint, and discovers the account and scopes from the response by path",
           "rmis": [
-            "RMI-CONNECTIONFORGE-007"
+            "RMI-CONNECTFORGE-007"
           ]
         },
         {
           "description": "`egress`: an HTTP client that allows only the manifest's hosts over HTTPS, refuses redirects to another host, and refuses private, loopback, link-local and shared addresses after DNS resolution",
           "rmis": [
-            "RMI-CONNECTIONFORGE-008"
+            "RMI-CONNECTFORGE-008"
           ]
         },
         {
           "description": "`broker`: `HTTPClient` checks authorization and state, unseals the credential once, and returns a client that authenticates a copy of each request; also `Seal`, `Unseal` and `ProviderClient`",
           "rmis": [
-            "RMI-CONNECTIONFORGE-009"
+            "RMI-CONNECTFORGE-009"
           ]
         },
         {
           "description": "`service`: `Create` (validates before storing anything), `Get`, `List`, `Rename`, `Test` and `Disconnect`, each authorized and audited, with a permanent failure moving a connection to `needs_attention` and a transient one changing only health",
           "rmis": [
-            "RMI-CONNECTIONFORGE-010"
+            "RMI-CONNECTFORGE-010"
           ]
         }
       ],
@@ -145,7 +145,7 @@
           "description": "MkDocs site with a getting-started page and a user guide covering connections and their lifecycle, using a connection, writing a provider, integrating with a host, storage and security"
         },
         {
-          "description": "Release notes for v0.1.0, and PRD, TRD, plan and roadmap under `docs/specs/initiatives/INIT-CONNECTIONFORGE-001`, with agent guidance in `AGENTS.md`"
+          "description": "Release notes for v0.1.0, and PRD, TRD, plan and roadmap under `docs/specs/initiatives/INIT-CONNECTFORGE-001`, with agent guidance in `AGENTS.md`"
         }
       ]
     }

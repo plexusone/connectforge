@@ -1,4 +1,4 @@
-module github.com/plexusone/connectionforge
+module github.com/plexusone/connectforge
 
 go 1.26.5
 

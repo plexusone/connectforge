@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/plexusone/connectionforge/provider"
-	"github.com/plexusone/connectionforge/provider/apikey"
+	"github.com/plexusone/connectforge/provider"
+	"github.com/plexusone/connectforge/provider/apikey"
 )
 
 // Tokens with fixed behaviour. Any other token is rejected with 401.

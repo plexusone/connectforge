@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
 )
 
 // ConnectionCreate is the builder for creating a Connection entity.
@@ -92,7 +92,7 @@ func (_c *ConnectionCreate) SetState(v string) *ConnectionCreate {
 }
 
 // SetHealth sets the "health" field.
-func (_c *ConnectionCreate) SetHealth(v connectionforge.Health) *ConnectionCreate {
+func (_c *ConnectionCreate) SetHealth(v connectforge.Health) *ConnectionCreate {
 	_c.mutation.SetHealth(v)
 	return _c
 }

@@ -1,5 +1,5 @@
-// Package sqlstore is connectionforge's [connectionforge.Store] and
-// [connectionforge.Leaser] on SQLite or PostgreSQL, through Ent.
+// Package sqlstore is connectforge's [connectforge.Store] and
+// [connectforge.Leaser] on SQLite or PostgreSQL, through Ent.
 //
 // The host owns the database: it opens it, passes it to [New], calls
 // [Store.Migrate], and applies its tenancy policy to [Store.Tables]. Every
@@ -25,8 +25,8 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent"
 )
 
 // Dialect is a supported database.
@@ -54,14 +54,14 @@ func WithClock(c cf.Clock) Option { return func(s *Store) { s.clock = c } }
 
 // Table names. Every table except [LeaseTable] has an owner_id column.
 const (
-	ConnectionTable = "connectionforge_connections"
-	CredentialTable = "connectionforge_credentials"
-	GrantTable      = "connectionforge_grants"
-	BindingTable    = "connectionforge_bindings"
-	LeaseTable      = "connectionforge_leases"
+	ConnectionTable = "connectforge_connections"
+	CredentialTable = "connectforge_credentials"
+	GrantTable      = "connectforge_grants"
+	BindingTable    = "connectforge_bindings"
+	LeaseTable      = "connectforge_leases"
 )
 
-// Store is a connectionforge store in a SQL database. It is safe for
+// Store is a connectforge store in a SQL database. It is safe for
 // concurrent use.
 type Store struct {
 	db      *sql.DB

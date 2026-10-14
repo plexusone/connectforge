@@ -1,4 +1,4 @@
-package connectionforge_test
+package connectforge_test
 
 import (
 	"go/ast"

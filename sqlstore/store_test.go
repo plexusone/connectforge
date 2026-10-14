@@ -15,14 +15,14 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib" // registers the "pgx" driver
 	_ "modernc.org/sqlite"             // registers the "sqlite" driver
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore"
-	"github.com/plexusone/connectionforge/store/storetest"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore"
+	"github.com/plexusone/connectforge/store/storetest"
 )
 
 // postgresEnv names a PostgreSQL connection string for the opt-in Postgres
 // tests. Each test case runs in its own schema, which is dropped afterwards.
-const postgresEnv = "CONNECTIONFORGE_TEST_POSTGRES_DSN"
+const postgresEnv = "CONNECTFORGE_TEST_POSTGRES_DSN"
 
 func openSQLite(t *testing.T, opts ...sqlstore.Option) *sqlstore.Store {
 	t.Helper()

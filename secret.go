@@ -1,4 +1,4 @@
-package connectionforge
+package connectforge
 
 import (
 	"fmt"

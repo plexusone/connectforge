@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
 )
 
 // Connection is the model entity for the Connection schema.
@@ -38,7 +38,7 @@ type Connection struct {
 	// State holds the value of the "state" field.
 	State string `json:"state,omitempty"`
 	// Health holds the value of the "health" field.
-	Health connectionforge.Health `json:"health,omitempty"`
+	Health connectforge.Health `json:"health,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// CreatedByKind holds the value of the "created_by_kind" field.

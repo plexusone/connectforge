@@ -3,12 +3,12 @@
 package ent
 
 import (
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
-	"github.com/plexusone/connectionforge/sqlstore/ent/schema"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

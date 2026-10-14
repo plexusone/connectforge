@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
-	"github.com/plexusone/connectionforge/sqlstore/ent/predicate"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/predicate"
 )
 
 // LeaseUpdate is the builder for updating Lease entities.

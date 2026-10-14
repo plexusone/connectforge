@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	// ConnectionforgeBindingsColumns holds the columns for the "connectionforge_bindings" table.
-	ConnectionforgeBindingsColumns = []*schema.Column{
+	// ConnectforgeBindingsColumns holds the columns for the "connectforge_bindings" table.
+	ConnectforgeBindingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "connection_id", Type: field.TypeString},
@@ -19,21 +19,21 @@ var (
 		{Name: "purpose", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 	}
-	// ConnectionforgeBindingsTable holds the schema information for the "connectionforge_bindings" table.
-	ConnectionforgeBindingsTable = &schema.Table{
-		Name:       "connectionforge_bindings",
-		Columns:    ConnectionforgeBindingsColumns,
-		PrimaryKey: []*schema.Column{ConnectionforgeBindingsColumns[0]},
+	// ConnectforgeBindingsTable holds the schema information for the "connectforge_bindings" table.
+	ConnectforgeBindingsTable = &schema.Table{
+		Name:       "connectforge_bindings",
+		Columns:    ConnectforgeBindingsColumns,
+		PrimaryKey: []*schema.Column{ConnectforgeBindingsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "binding_owner_id_connection_id_consumer_kind_consumer_id_purpose",
 				Unique:  true,
-				Columns: []*schema.Column{ConnectionforgeBindingsColumns[1], ConnectionforgeBindingsColumns[2], ConnectionforgeBindingsColumns[3], ConnectionforgeBindingsColumns[4], ConnectionforgeBindingsColumns[5]},
+				Columns: []*schema.Column{ConnectforgeBindingsColumns[1], ConnectforgeBindingsColumns[2], ConnectforgeBindingsColumns[3], ConnectforgeBindingsColumns[4], ConnectforgeBindingsColumns[5]},
 			},
 		},
 	}
-	// ConnectionforgeConnectionsColumns holds the columns for the "connectionforge_connections" table.
-	ConnectionforgeConnectionsColumns = []*schema.Column{
+	// ConnectforgeConnectionsColumns holds the columns for the "connectforge_connections" table.
+	ConnectforgeConnectionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "connection_id", Type: field.TypeString},
@@ -52,26 +52,26 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "revision", Type: field.TypeUint64},
 	}
-	// ConnectionforgeConnectionsTable holds the schema information for the "connectionforge_connections" table.
-	ConnectionforgeConnectionsTable = &schema.Table{
-		Name:       "connectionforge_connections",
-		Columns:    ConnectionforgeConnectionsColumns,
-		PrimaryKey: []*schema.Column{ConnectionforgeConnectionsColumns[0]},
+	// ConnectforgeConnectionsTable holds the schema information for the "connectforge_connections" table.
+	ConnectforgeConnectionsTable = &schema.Table{
+		Name:       "connectforge_connections",
+		Columns:    ConnectforgeConnectionsColumns,
+		PrimaryKey: []*schema.Column{ConnectforgeConnectionsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "connection_owner_id_connection_id",
 				Unique:  true,
-				Columns: []*schema.Column{ConnectionforgeConnectionsColumns[1], ConnectionforgeConnectionsColumns[2]},
+				Columns: []*schema.Column{ConnectforgeConnectionsColumns[1], ConnectforgeConnectionsColumns[2]},
 			},
 			{
 				Name:    "connection_owner_id_provider",
 				Unique:  false,
-				Columns: []*schema.Column{ConnectionforgeConnectionsColumns[1], ConnectionforgeConnectionsColumns[3]},
+				Columns: []*schema.Column{ConnectforgeConnectionsColumns[1], ConnectforgeConnectionsColumns[3]},
 			},
 		},
 	}
-	// ConnectionforgeCredentialsColumns holds the columns for the "connectionforge_credentials" table.
-	ConnectionforgeCredentialsColumns = []*schema.Column{
+	// ConnectforgeCredentialsColumns holds the columns for the "connectforge_credentials" table.
+	ConnectforgeCredentialsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "connection_id", Type: field.TypeString},
@@ -81,21 +81,21 @@ var (
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 	}
-	// ConnectionforgeCredentialsTable holds the schema information for the "connectionforge_credentials" table.
-	ConnectionforgeCredentialsTable = &schema.Table{
-		Name:       "connectionforge_credentials",
-		Columns:    ConnectionforgeCredentialsColumns,
-		PrimaryKey: []*schema.Column{ConnectionforgeCredentialsColumns[0]},
+	// ConnectforgeCredentialsTable holds the schema information for the "connectforge_credentials" table.
+	ConnectforgeCredentialsTable = &schema.Table{
+		Name:       "connectforge_credentials",
+		Columns:    ConnectforgeCredentialsColumns,
+		PrimaryKey: []*schema.Column{ConnectforgeCredentialsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "credential_owner_id_connection_id_version",
 				Unique:  true,
-				Columns: []*schema.Column{ConnectionforgeCredentialsColumns[1], ConnectionforgeCredentialsColumns[2], ConnectionforgeCredentialsColumns[3]},
+				Columns: []*schema.Column{ConnectforgeCredentialsColumns[1], ConnectforgeCredentialsColumns[2], ConnectforgeCredentialsColumns[3]},
 			},
 		},
 	}
-	// ConnectionforgeGrantsColumns holds the columns for the "connectionforge_grants" table.
-	ConnectionforgeGrantsColumns = []*schema.Column{
+	// ConnectforgeGrantsColumns holds the columns for the "connectforge_grants" table.
+	ConnectforgeGrantsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "connection_id", Type: field.TypeString},
@@ -103,56 +103,56 @@ var (
 		{Name: "principal_id", Type: field.TypeString},
 		{Name: "actions", Type: field.TypeJSON},
 	}
-	// ConnectionforgeGrantsTable holds the schema information for the "connectionforge_grants" table.
-	ConnectionforgeGrantsTable = &schema.Table{
-		Name:       "connectionforge_grants",
-		Columns:    ConnectionforgeGrantsColumns,
-		PrimaryKey: []*schema.Column{ConnectionforgeGrantsColumns[0]},
+	// ConnectforgeGrantsTable holds the schema information for the "connectforge_grants" table.
+	ConnectforgeGrantsTable = &schema.Table{
+		Name:       "connectforge_grants",
+		Columns:    ConnectforgeGrantsColumns,
+		PrimaryKey: []*schema.Column{ConnectforgeGrantsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "grant_owner_id_connection_id_principal_kind_principal_id",
 				Unique:  true,
-				Columns: []*schema.Column{ConnectionforgeGrantsColumns[1], ConnectionforgeGrantsColumns[2], ConnectionforgeGrantsColumns[3], ConnectionforgeGrantsColumns[4]},
+				Columns: []*schema.Column{ConnectforgeGrantsColumns[1], ConnectforgeGrantsColumns[2], ConnectforgeGrantsColumns[3], ConnectforgeGrantsColumns[4]},
 			},
 		},
 	}
-	// ConnectionforgeLeasesColumns holds the columns for the "connectionforge_leases" table.
-	ConnectionforgeLeasesColumns = []*schema.Column{
+	// ConnectforgeLeasesColumns holds the columns for the "connectforge_leases" table.
+	ConnectforgeLeasesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "token", Type: field.TypeString},
 		{Name: "expires_at", Type: field.TypeTime},
 	}
-	// ConnectionforgeLeasesTable holds the schema information for the "connectionforge_leases" table.
-	ConnectionforgeLeasesTable = &schema.Table{
-		Name:       "connectionforge_leases",
-		Columns:    ConnectionforgeLeasesColumns,
-		PrimaryKey: []*schema.Column{ConnectionforgeLeasesColumns[0]},
+	// ConnectforgeLeasesTable holds the schema information for the "connectforge_leases" table.
+	ConnectforgeLeasesTable = &schema.Table{
+		Name:       "connectforge_leases",
+		Columns:    ConnectforgeLeasesColumns,
+		PrimaryKey: []*schema.Column{ConnectforgeLeasesColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ConnectionforgeBindingsTable,
-		ConnectionforgeConnectionsTable,
-		ConnectionforgeCredentialsTable,
-		ConnectionforgeGrantsTable,
-		ConnectionforgeLeasesTable,
+		ConnectforgeBindingsTable,
+		ConnectforgeConnectionsTable,
+		ConnectforgeCredentialsTable,
+		ConnectforgeGrantsTable,
+		ConnectforgeLeasesTable,
 	}
 )
 
 func init() {
-	ConnectionforgeBindingsTable.Annotation = &entsql.Annotation{
-		Table: "connectionforge_bindings",
+	ConnectforgeBindingsTable.Annotation = &entsql.Annotation{
+		Table: "connectforge_bindings",
 	}
-	ConnectionforgeConnectionsTable.Annotation = &entsql.Annotation{
-		Table: "connectionforge_connections",
+	ConnectforgeConnectionsTable.Annotation = &entsql.Annotation{
+		Table: "connectforge_connections",
 	}
-	ConnectionforgeCredentialsTable.Annotation = &entsql.Annotation{
-		Table: "connectionforge_credentials",
+	ConnectforgeCredentialsTable.Annotation = &entsql.Annotation{
+		Table: "connectforge_credentials",
 	}
-	ConnectionforgeGrantsTable.Annotation = &entsql.Annotation{
-		Table: "connectionforge_grants",
+	ConnectforgeGrantsTable.Annotation = &entsql.Annotation{
+		Table: "connectforge_grants",
 	}
-	ConnectionforgeLeasesTable.Annotation = &entsql.Annotation{
-		Table: "connectionforge_leases",
+	ConnectforgeLeasesTable.Annotation = &entsql.Annotation{
+		Table: "connectforge_leases",
 	}
 }

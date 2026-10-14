@@ -1,4 +1,4 @@
-# connectionforge
+# connectforge
 
 Manage a tenant's connections to external services in Go: provider
 definitions, connections, sealed credentials, grants and bindings, and a
@@ -6,7 +6,7 @@ broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.
 
 !!! warning "Pre-release"
-    connectionforge has not been externally audited. Version 0.1.0 supports
+    connectforge has not been externally audited. Version 0.1.0 supports
     static API-token connections. Read [Security](guides/security.md) first.
 
 ## What it does
@@ -37,5 +37,5 @@ raw secret.
   few minutes.
 - The [user guide](guides/index.md) explains connections, providers, how to
   integrate with a host application, storage and security.
-- The [design](specs/initiatives/INIT-CONNECTIONFORGE-001/PRD.md) documents
+- The [design](specs/initiatives/INIT-CONNECTFORGE-001/PRD.md) documents
   hold the requirements, the technical design and the roadmap.

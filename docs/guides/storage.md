@@ -1,20 +1,20 @@
 # Storage
 
-connectionforge has two stores that pass the same conformance suite.
+connectforge has two stores that pass the same conformance suite.
 
 | Store | Package | Use |
 |---|---|---|
 | In memory | `store/memstore` | Tests and examples; the reference for behaviour |
 | SQL | `sqlstore` | SQLite and PostgreSQL through Ent, on your own database |
 
-A store implements `connectionforge.Store`, which is `ConnectionStore`,
+A store implements `connectforge.Store`, which is `ConnectionStore`,
 `CredentialStore`, `GrantStore` and `BindingStore`. The SQL store and
 `memstore` also implement `Leaser`.
 
 ## The SQL store
 
 ```go
-import "github.com/plexusone/connectionforge/sqlstore"
+import "github.com/plexusone/connectforge/sqlstore"
 
 store, err := sqlstore.New(db, sqlstore.Postgres,
 	sqlstore.WithTxHook(func(ctx context.Context, tx *sql.Tx) error {
@@ -35,7 +35,7 @@ tables := store.Tables() // for your tenancy policy
 - **The schema is the module's.** Ent code lives in `sqlstore/ent`. You do not
   regenerate or merge it into your own Ent client; you share the database,
   not the code generation.
-- **Tables are prefixed `connectionforge_`:** `connections`, `credentials`,
+- **Tables are prefixed `connectforge_`:** `connections`, `credentials`,
   `grants`, `bindings` and `leases`.
 - **Every owned table has `owner_id`** (text), and every query filters on it.
 - **Ciphertext is stored as bytes.** No column holds plaintext.
@@ -89,9 +89,9 @@ func setTenant(ctx context.Context, tx *sql.Tx) error {
 ```
 
 ```sql
-ALTER TABLE connectionforge_connections ENABLE ROW LEVEL SECURITY;
-ALTER TABLE connectionforge_connections FORCE ROW LEVEL SECURITY;
-CREATE POLICY connectionforge_connections_tenant ON connectionforge_connections
+ALTER TABLE connectforge_connections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE connectforge_connections FORCE ROW LEVEL SECURITY;
+CREATE POLICY connectforge_connections_tenant ON connectforge_connections
   USING (owner_id = current_setting('app.current_tenant', true))
   WITH CHECK (owner_id = current_setting('app.current_tenant', true));
 ```

@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/provider"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/provider"
 )
 
 // Config describes a static-token provider.

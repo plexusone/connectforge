@@ -8,7 +8,7 @@ adapter; see [Integrating with a host](guides/host-integration.md).
 ## Install
 
 ```bash
-go get github.com/plexusone/connectionforge@v0.1.0
+go get github.com/plexusone/connectforge@v0.1.0
 ```
 
 Requires Go 1.26.
@@ -21,8 +21,8 @@ token, the `apikey` provider is configuration only:
 
 ```go
 import (
-	"github.com/plexusone/connectionforge/provider"
-	"github.com/plexusone/connectionforge/provider/apikey"
+	"github.com/plexusone/connectforge/provider"
+	"github.com/plexusone/connectforge/provider/apikey"
 )
 
 p, err := apikey.New(apikey.Config{
@@ -51,11 +51,11 @@ if err := providers.Register(p); err != nil {
 
 ```go
 import (
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/broker"
-	"github.com/plexusone/connectionforge/cryptotest"
-	"github.com/plexusone/connectionforge/service"
-	"github.com/plexusone/connectionforge/store/memstore"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/broker"
+	"github.com/plexusone/connectforge/cryptotest"
+	"github.com/plexusone/connectforge/service"
+	"github.com/plexusone/connectforge/store/memstore"
 )
 
 store := memstore.New()
@@ -96,7 +96,7 @@ conn, err := svc.Create(ctx, service.CreateInput{
 
 `Create` calls the provider's verification endpoint first. If the provider
 rejects the token, nothing is stored and the error wraps
-`connectionforge.ErrInvalidCredential`. On success `conn` holds the discovered
+`connectforge.ErrInvalidCredential`. On success `conn` holds the discovered
 account (`ExternalAccountID`, `ExternalLabel`) and state `connected`. The token
 itself is sealed and stored separately and is never part of `conn`.
 

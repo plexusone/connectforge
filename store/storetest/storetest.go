@@ -1,9 +1,9 @@
-// Package storetest is the conformance suite every [connectionforge.Store] and
-// [connectionforge.Leaser] must pass. A store's own tests call it with a
+// Package storetest is the conformance suite every [connectforge.Store] and
+// [connectforge.Leaser] must pass. A store's own tests call it with a
 // constructor:
 //
 //	func TestConformance(t *testing.T) {
-//		storetest.Run(t, func(t *testing.T) connectionforge.Store { return newStore(t) })
+//		storetest.Run(t, func(t *testing.T) connectforge.Store { return newStore(t) })
 //	}
 //
 // It checks owner isolation on every method, compare-and-swap on connections
@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 const (

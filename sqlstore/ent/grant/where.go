@@ -4,7 +4,7 @@ package grant
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/predicate"
+	"github.com/plexusone/connectforge/sqlstore/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

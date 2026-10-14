@@ -44,7 +44,7 @@ const (
 	// FieldRevision holds the string denoting the revision field in the database.
 	FieldRevision = "revision"
 	// Table holds the table name of the connection in the database.
-	Table = "connectionforge_connections"
+	Table = "connectforge_connections"
 )
 
 // Columns holds all SQL columns for connection fields.

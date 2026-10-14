@@ -1,7 +1,7 @@
-# connectionforge: Technical Requirements
+# connectforge: Technical Requirements
 
-**Initiative:** `INIT-CONNECTIONFORGE-001`
-**Repository:** `github.com/plexusone/connectionforge`
+**Initiative:** `INIT-CONNECTFORGE-001`
+**Repository:** `github.com/plexusone/connectforge`
 
 ## Concepts
 
@@ -20,7 +20,7 @@ authorization is obtained, and the broker hides which.
 
 ## Architecture
 
-connectionforge is a library of ports and a core that composes them. It
+connectforge is a library of ports and a core that composes them. It
 imports the Go standard library, `golang.org/x/oauth2` and nothing from any
 host. The host is the composition root.
 
@@ -30,7 +30,7 @@ host application
   ├── registers Providers (adapters, each with a Manifest)
   └── mounts httpapi (optional) or calls the Service directly
 
-connectionforge
+connectforge
   ├── Service   create, test, reconnect, replace, revoke, list
   ├── Broker    authenticated clients for a connection
   └── Refresher single-flight token refresh
@@ -40,7 +40,7 @@ connectionforge
 
 | Package | Responsibility | Imports |
 |---|---|---|
-| `connectionforge` (root) | Types, errors, `Secret`, ports, lifecycle states | stdlib |
+| `connectforge` (root) | Types, errors, `Secret`, ports, lifecycle states | stdlib |
 | `provider` | `Provider`, capability interfaces, `Manifest`, registry | root |
 | `provider/apikey` | Reference static-credential provider driven by a manifest | root, provider |
 | `provider/githubapp` | GitHub App installations | root, provider |
@@ -53,9 +53,9 @@ connectionforge
 | `sqlstore/ent` | The Ent schema and generated code | Ent |
 | `egress` | Destination policy and an HTTP client factory | stdlib |
 | `httpapi` | Handlers over `service`, mounted by the host | service |
-| `cmd/connectionforge` | Thin CLI over `service` | service |
+| `cmd/connectforge` | Thin CLI over `service` | service |
 
-connectionforge owns its domain, including its database schema. The host
+connectforge owns its domain, including its database schema. The host
 composes it: it opens `sqlstore` on its own database, runs its migration, and
 applies its tenancy policy (for example row-level security) to the tables
 `sqlstore` reports. Ent and the database drivers are imported by `sqlstore`
@@ -105,7 +105,7 @@ pending ──authorize/validate──► connected ──► disconnected
 | `connected` | Credential accepted by the provider at last check |
 | `needs_attention` | A permanent failure: revoked upstream, expired, scope lost. The broker refuses use |
 | `disconnected` | Disconnected by a person; credentials destroyed |
-| `revoked` | Revoked at the provider by connectionforge; terminal |
+| `revoked` | Revoked at the provider by connectforge; terminal |
 
 Transient failures (network, rate limit, provider outage) change `Health`,
 never `State`. The transition table lives in code, is the single source for
@@ -219,7 +219,7 @@ type SecretSource interface {
 
 - **Cryptographer** binds `aad` to the owner, connection ID and credential
   version, so a ciphertext cannot be moved between connections or tenants.
-  The purpose is `connectionforge.credential`. The port is deliberately the
+  The purpose is `connectforge.credential`. The port is deliberately the
   same shape as an envelope-encryption client's encrypt and decrypt, so a
   key-management library satisfies it with a small adapter in the host.
 - **Leaser** is how refresh is made single-flight across processes. A host
@@ -252,7 +252,7 @@ tables := store.Tables() // for the host's tenancy policy
 - **Own generated client.** The Ent schema and generated code live in
   `sqlstore/ent`. The host does not regenerate or merge them into its own
   client; it shares the database, not the code generation.
-- **Table names are prefixed** `connectionforge_`, so they cannot collide with
+- **Table names are prefixed** `connectforge_`, so they cannot collide with
   the host's.
 - **Tenant column.** Every table carries `owner_id` (text). Every query
   filters on it in code; a host that enables row-level security keys its
@@ -427,7 +427,7 @@ type Broker interface {
   refused unless the host explicitly allows a development destination.
 - The result is an `*http.Client` a provider SDK can accept
   (`WithHTTPClient`), which is how SDKs consume a connection without
-  connectionforge importing them.
+  connectforge importing them.
 
 ## Service
 

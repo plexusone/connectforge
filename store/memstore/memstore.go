@@ -1,5 +1,5 @@
-// Package memstore is an in-memory [connectionforge.Store] and
-// [connectionforge.Leaser]. It is the reference for behaviour that other
+// Package memstore is an in-memory [connectforge.Store] and
+// [connectforge.Leaser]. It is the reference for behaviour that other
 // stores are compared against, and it is meant for tests and examples.
 package memstore
 
@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 type connKey struct {

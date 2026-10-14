@@ -24,7 +24,7 @@ const (
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// Table holds the table name of the binding in the database.
-	Table = "connectionforge_bindings"
+	Table = "connectforge_bindings"
 )
 
 // Columns holds all SQL columns for binding fields.

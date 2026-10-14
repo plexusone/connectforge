@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
 )
 
 // LeaseCreate is the builder for creating a Lease entity.

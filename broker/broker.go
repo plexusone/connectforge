@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"net/http"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/egress"
-	"github.com/plexusone/connectionforge/provider"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/egress"
+	"github.com/plexusone/connectforge/provider"
 )
 
 // Options configures a [Broker].

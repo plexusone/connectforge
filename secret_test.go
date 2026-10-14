@@ -1,4 +1,4 @@
-package connectionforge_test
+package connectforge_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 const sentinel = "sk-sentinel-0000"

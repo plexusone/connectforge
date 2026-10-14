@@ -1,8 +1,8 @@
-site_name: connectionforge
+site_name: connectforge
 site_description: Tenant connections to external services for Go applications
-site_url: https://plexusone.github.io/connectionforge/
-repo_url: https://github.com/plexusone/connectionforge
-repo_name: plexusone/connectionforge
+site_url: https://plexusone.github.io/connectforge/
+repo_url: https://github.com/plexusone/connectforge
+repo_name: plexusone/connectforge
 
 theme:
   name: material
@@ -59,10 +59,10 @@ nav:
       - Storage: guides/storage.md
       - Security: guides/security.md
   - Design:
-      - Product Requirements: specs/initiatives/INIT-CONNECTIONFORGE-001/PRD.md
-      - Technical Requirements: specs/initiatives/INIT-CONNECTIONFORGE-001/TRD.md
-      - Plan: specs/initiatives/INIT-CONNECTIONFORGE-001/PLAN.md
-      - Roadmap: specs/initiatives/INIT-CONNECTIONFORGE-001/ROADMAP.md
+      - Product Requirements: specs/initiatives/INIT-CONNECTFORGE-001/PRD.md
+      - Technical Requirements: specs/initiatives/INIT-CONNECTFORGE-001/TRD.md
+      - Plan: specs/initiatives/INIT-CONNECTFORGE-001/PLAN.md
+      - Roadmap: specs/initiatives/INIT-CONNECTFORGE-001/ROADMAP.md
   - Releases:
       - v0.2.0: releases/v0.2.0.md
       - v0.1.0: releases/v0.1.0.md
@@ -70,4 +70,4 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/plexusone/connectionforge
+      link: https://github.com/plexusone/connectforge

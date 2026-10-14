@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/store/memstore"
-	"github.com/plexusone/connectionforge/store/storetest"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/store/memstore"
+	"github.com/plexusone/connectforge/store/storetest"
 )
 
 func TestConformance(t *testing.T) {

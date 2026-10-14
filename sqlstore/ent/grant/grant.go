@@ -22,7 +22,7 @@ const (
 	// FieldActions holds the string denoting the actions field in the database.
 	FieldActions = "actions"
 	// Table holds the table name of the grant in the database.
-	Table = "connectionforge_grants"
+	Table = "connectforge_grants"
 )
 
 // Columns holds all SQL columns for grant fields.

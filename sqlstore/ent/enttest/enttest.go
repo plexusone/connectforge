@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/plexusone/connectionforge/sqlstore/ent"
+	"github.com/plexusone/connectforge/sqlstore/ent"
 	// required by schema hooks.
-	_ "github.com/plexusone/connectionforge/sqlstore/ent/runtime"
+	_ "github.com/plexusone/connectforge/sqlstore/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/plexusone/connectionforge/sqlstore/ent/migrate"
+	"github.com/plexusone/connectforge/sqlstore/ent/migrate"
 )
 
 type (

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 // requestIDHeaders are the response headers providers use for a request ID.
@@ -27,7 +27,7 @@ func (e *StatusError) Error() string {
 	return msg
 }
 
-// Unwrap returns the class, so errors.Is works with connectionforge's errors.
+// Unwrap returns the class, so errors.Is works with connectforge's errors.
 func (e *StatusError) Unwrap() error { return e.Class }
 
 // Classify returns nil for a 2xx response and a [*StatusError] otherwise: 401

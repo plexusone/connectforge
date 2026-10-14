@@ -1,8 +1,8 @@
 # User guide
 
-connectionforge is a library. Your application, the **host**, supplies where
+connectforge is a library. Your application, the **host**, supplies where
 data is stored, how credentials are encrypted, who is allowed to do what, and
-where audit events go. connectionforge supplies the model, the lifecycle, the
+where audit events go. connectforge supplies the model, the lifecycle, the
 provider contract, the broker and the operations.
 
 ```text
@@ -11,7 +11,7 @@ your application
   ├── registers    providers (a manifest and a verification each)
   └── calls        service (create, test, list, ...) and broker (HTTP clients)
 
-connectionforge
+connectforge
   ├── service   operations, authorized and audited
   ├── broker    the only path from a stored credential to a request
   └── stores    in memory, or SQLite and PostgreSQL through Ent
@@ -23,8 +23,8 @@ connectionforge
 |---|---|
 | Building an application that lets people connect services | [Connections and their lifecycle](connections.md), then [Using a connection](using-connections.md) |
 | Adding a service | [Writing a provider](providers.md) |
-| Wiring connectionforge into a platform | [Integrating with a host](host-integration.md) and [Storage](storage.md) |
-| Reviewing the design | [Security](security.md) and the [design documents](../specs/initiatives/INIT-CONNECTIONFORGE-001/TRD.md) |
+| Wiring connectforge into a platform | [Integrating with a host](host-integration.md) and [Storage](storage.md) |
+| Reviewing the design | [Security](security.md) and the [design documents](../specs/initiatives/INIT-CONNECTFORGE-001/TRD.md) |
 
 ## Vocabulary
 

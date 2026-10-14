@@ -1,5 +1,5 @@
 // Package cryptotest is the conformance suite for a
-// [connectionforge.Cryptographer], and an in-memory cryptographer for tests.
+// [connectforge.Cryptographer], and an in-memory cryptographer for tests.
 package cryptotest
 
 import (
@@ -12,7 +12,7 @@ import (
 	"errors"
 	"testing"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 // Run checks that c round-trips, never stores the plaintext, and refuses a

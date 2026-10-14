@@ -1,4 +1,4 @@
-// Package connectionforge manages a tenant's connections to external services:
+// Package connectforge manages a tenant's connections to external services:
 // the provider, the connection, its encrypted credential, who may use it and
 // what depends on it.
 //
@@ -7,5 +7,5 @@
 // secret. Storage, encryption, authorization, audit and egress policy are
 // ports that the host application supplies.
 //
-// The design is in docs/specs/initiatives/INIT-CONNECTIONFORGE-001.
-package connectionforge
+// The design is in docs/specs/initiatives/INIT-CONNECTFORGE-001.
+package connectforge

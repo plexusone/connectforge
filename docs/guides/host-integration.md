@@ -1,10 +1,10 @@
 # Integrating with a host
 
-connectionforge imports no key manager, secret manager, authorization system
+connectforge imports no key manager, secret manager, authorization system
 or application framework. Your application, the host, supplies five small
 interfaces and a store. This page shows each.
 
-| Port | You supply | connectionforge uses it to |
+| Port | You supply | connectforge uses it to |
 |---|---|---|
 | `Cryptographer` | Encryption under a managed key | Seal and open credentials |
 | `Authorizer` | Your authorization | Decide whether a principal may view, use, manage, share or disconnect |
@@ -22,8 +22,8 @@ type Cryptographer interface {
 }
 ```
 
-`purpose` is always `connectionforge.CredentialPurpose`
-(`connectionforge.credential`). `aad` binds the ciphertext to its owner,
+`purpose` is always `connectforge.CredentialPurpose`
+(`connectforge.credential`). `aad` binds the ciphertext to its owner,
 connection and credential version, so it cannot be moved to another record:
 an implementation must fail to open a ciphertext with different `aad` or a
 different purpose. Run `cryptotest.Run` against your implementation to check.
@@ -51,7 +51,7 @@ func (k keyforgeCrypto) Open(ctx context.Context, purpose string, ct, aad []byte
 }
 ```
 
-Declare `connectionforge.credential` as a purpose when you open the key
+Declare `connectforge.credential` as a purpose when you open the key
 system. `cryptotest.New()` is an in-memory AES-256-GCM implementation for
 tests; do not use it in production, because its key lives only in memory.
 
@@ -63,7 +63,7 @@ type Authorizer interface {
 }
 ```
 
-Return nil to allow, or an error wrapping `connectionforge.ErrDenied` to
+Return nil to allow, or an error wrapping `connectforge.ErrDenied` to
 refuse. Any other error is reported as a failure, not a refusal, so a broken
 authorization backend is never mistaken for "no".
 
@@ -106,7 +106,7 @@ type SecretSource interface {
 ```
 
 For secrets that belong to the deployment rather than to a tenant. Per-tenant
-credentials never go through it: they are sealed and stored by connectionforge.
+credentials never go through it: they are sealed and stored by connectforge.
 
 ## Tenancy
 

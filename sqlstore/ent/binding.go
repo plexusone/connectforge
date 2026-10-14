@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
 )
 
 // Binding is the model entity for the Binding schema.

@@ -12,11 +12,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
 )
 
 // ent aliases to avoid import conflicts in user's code.

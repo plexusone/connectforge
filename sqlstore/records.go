@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	cf "github.com/plexusone/connectionforge"
-	"github.com/plexusone/connectionforge/sqlstore/ent"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
-	"github.com/plexusone/connectionforge/sqlstore/ent/connection"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
-	"github.com/plexusone/connectionforge/sqlstore/ent/grant"
-	"github.com/plexusone/connectionforge/sqlstore/ent/lease"
+	cf "github.com/plexusone/connectforge"
+	"github.com/plexusone/connectforge/sqlstore/ent"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/connection"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/grant"
+	"github.com/plexusone/connectforge/sqlstore/ent/lease"
 )
 
 func toConnection(e *ent.Connection) cf.Connection {

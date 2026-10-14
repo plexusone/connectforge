@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/plexusone/connectionforge/egress"
-	"github.com/plexusone/connectionforge/internal/fakeapi"
+	"github.com/plexusone/connectforge/egress"
+	"github.com/plexusone/connectforge/internal/fakeapi"
 )
 
 func host(t *testing.T, raw string) string {

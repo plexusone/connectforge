@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
 )
 
 // Credential is the model entity for the Credential schema.

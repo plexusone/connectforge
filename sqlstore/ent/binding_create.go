@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge/sqlstore/ent/binding"
+	"github.com/plexusone/connectforge/sqlstore/ent/binding"
 )
 
 // BindingCreate is the builder for creating a Binding entity.

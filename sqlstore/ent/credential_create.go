@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/plexusone/connectionforge/sqlstore/ent/credential"
+	"github.com/plexusone/connectforge/sqlstore/ent/credential"
 )
 
 // CredentialCreate is the builder for creating a Credential entity.

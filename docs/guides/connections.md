@@ -58,7 +58,7 @@ Every store enforces the transition table; a change it forbids returns
 | 429 | `ErrRateLimited` | Health only |
 | 5xx, network error, unparseable response | `ErrTransient` | Health only |
 
-`connectionforge.Permanent(err)` reports whether an error is one of the
+`connectforge.Permanent(err)` reports whether an error is one of the
 permanent kinds.
 
 ## The operations

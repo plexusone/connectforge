@@ -18,7 +18,7 @@ const (
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
 	// Table holds the table name of the lease in the database.
-	Table = "connectionforge_leases"
+	Table = "connectforge_leases"
 )
 
 // Columns holds all SQL columns for lease fields.

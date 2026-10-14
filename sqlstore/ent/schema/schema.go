@@ -1,5 +1,5 @@
-// Package schema is the Ent schema of connectionforge's SQL store. Every table
-// is prefixed connectionforge_ and carries owner_id, except the lease table,
+// Package schema is the Ent schema of connectforge's SQL store. Every table
+// is prefixed connectforge_ and carries owner_id, except the lease table,
 // whose keys are not owned.
 package schema
 
@@ -10,11 +10,11 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	cf "github.com/plexusone/connectionforge"
+	cf "github.com/plexusone/connectforge"
 )
 
 func table(name string) []schema.Annotation {
-	return []schema.Annotation{entsql.Annotation{Table: "connectionforge_" + name}}
+	return []schema.Annotation{entsql.Annotation{Table: "connectforge_" + name}}
 }
 
 func ownerField() ent.Field {
