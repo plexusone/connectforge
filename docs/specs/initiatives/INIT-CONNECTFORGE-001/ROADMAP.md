@@ -67,7 +67,8 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTFORGE-010`
 - [x] `RMI-CONNECTFORGE-017` Credential replacement and rotation with two coexisting versions and validate-before-activate
   - Depends on: `RMI-CONNECTFORGE-013`
-- [ ] `RMI-CONNECTFORGE-018` Grants and bindings: enforcement through the `Authorizer`, binding-aware disconnect. Bindings are listed, bound and unbound through the service; grants are held by the host's authorization (SystemForge uses its resource grants), so what remains is a disconnect that requires acknowledging its bindings
+- [ ] `RMI-CONNECTFORGE-018` Grants and bindings: enforcement through the `Authorizer` and a disconnect that requires acknowledging its bindings
+  - Note: bindings are listed, bound and unbound through the service, and grants are held by the host's authorization (SystemForge uses its resource grants)
   - Depends on: `RMI-CONNECTFORGE-010`
 - [ ] `RMI-CONNECTFORGE-019` Status model and metrics interface: states, health, expiring credentials, failing connections
   - Depends on: `RMI-CONNECTFORGE-016`
