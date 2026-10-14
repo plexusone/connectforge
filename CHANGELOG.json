@@ -9,6 +9,26 @@
   ],
   "releases": [
     {
+      "version": "v0.3.0",
+      "date": "2026-10-13",
+      "highlights": [
+        {
+          "description": "The module is renamed from connectionforge to connectforge"
+        }
+      ],
+      "changed": [
+        {
+          "description": "**Breaking:** the module path is `github.com/plexusone/connectforge` and the package is `connectforge`"
+        },
+        {
+          "description": "**Breaking:** the Ent tables are prefixed `connectforge_` and the credential purpose is `connectforge.credential`; a deployment with data from an earlier version renames its tables and re-seals credentials, or reconnects them"
+        },
+        {
+          "description": "The test database environment variable is `CONNECTFORGE_TEST_POSTGRES_DSN`"
+        }
+      ]
+    },
+    {
       "version": "v0.2.0",
       "date": "2026-10-13",
       "highlights": [
