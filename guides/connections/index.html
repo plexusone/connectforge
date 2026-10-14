@@ -526,6 +526,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconnect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#test-in-detail" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -942,6 +953,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.2.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.1.0/" class="md-nav__link">
         
   
@@ -1057,6 +1096,17 @@
   
     <nav class="md-nav" aria-label="The operations">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconnect
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#test-in-detail" class="md-nav__link">
@@ -1285,21 +1335,54 @@ your <code>Authorizer</code> and records an audit event.</p>
 <td><code>disconnect</code></td>
 <td>Marks the connection disconnected and destroys its credentials. The record stays, so the audit trail and bindings keep their reference</td>
 </tr>
+<tr>
+<td><code>Reconnect</code></td>
+<td><code>manage</code></td>
+<td>Replaces the credential, keeping the connection and everything bound to it. See below</td>
+</tr>
+<tr>
+<td><code>Bindings</code></td>
+<td><code>view</code></td>
+<td>Lists what depends on the connection, so a person can see what a disconnect would stop</td>
+</tr>
+<tr>
+<td><code>Bind</code>, <code>Unbind</code></td>
+<td><code>use</code></td>
+<td>Records, or removes, that a consumer depends on the connection for a purpose</td>
+</tr>
 </tbody>
 </table>
+<h3 id="reconnect">Reconnect<a class="headerlink" href="#reconnect" title="Permanent link">&para;</a></h3>
+<p>A token expires, is revoked, or is rotated. <code>Reconnect</code> puts the connection
+right without creating a new one, so the features bound to it keep working:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">conn</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">Reconnect</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">ReconnectInput</span><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">Owner</span><span class="p">:</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">Actor</span><span class="p">:</span><span class="w"> </span><span class="nx">actor</span><span class="p">,</span><span class="w"> </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="nx">conn</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">Fields</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">cf</span><span class="p">.</span><span class="nx">Secret</span><span class="p">{</span><span class="s">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">SecretString</span><span class="p">(</span><span class="nx">newToken</span><span class="p">)},</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">})</span>
+</code></pre></div>
+<p>The new credential is validated with the provider <strong>before</strong> anything is
+stored, so a rejected one changes nothing. It must belong to the same account
+as the connection (<code>ErrAccountMismatch</code> otherwise): connecting another account
+is a new connection, so a feature never silently reads someone else's data.
+On success the connection is <code>connected</code> again with fresh health, and its
+credential has a new version.</p>
+<p>Reconnect also recovers a connection whose sealed credential can no longer be
+read, for example after a lost key ring: the new credential is sealed without
+opening the old one. A <code>disconnected</code> connection can be reconnected; a
+<code>revoked</code> one cannot.</p>
 <h3 id="test-in-detail">Test, in detail<a class="headerlink" href="#test-in-detail" title="Permanent link">&para;</a></h3>
 <p><code>Test</code> does not return the validation failure as an error. A failed check is a
 normal outcome that is recorded; read it from the returned connection:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">conn</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">Test</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">actor</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="c1">// not found, denied, or the connection cannot be tested</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">case</span><span class="w"> </span><span class="nx">conn</span><span class="p">.</span><span class="nx">State</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">StateNeedsAttention</span><span class="p">:</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="c1">// the person must reconnect</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">case</span><span class="w"> </span><span class="nx">conn</span><span class="p">.</span><span class="nx">Health</span><span class="p">.</span><span class="nx">LastValidation</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">OutcomeFailed</span><span class="p">:</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="c1">// a temporary problem; try again later</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">conn</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">Test</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">actor</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="c1">// not found, denied, or the connection cannot be tested</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">case</span><span class="w"> </span><span class="nx">conn</span><span class="p">.</span><span class="nx">State</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">StateNeedsAttention</span><span class="p">:</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="c1">// the person must reconnect</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">case</span><span class="w"> </span><span class="nx">conn</span><span class="p">.</span><span class="nx">Health</span><span class="p">.</span><span class="nx">LastValidation</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">OutcomeFailed</span><span class="p">:</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="c1">// a temporary problem; try again later</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
 </code></pre></div>
 <p>A connection that is <code>disconnected</code> or <code>revoked</code> cannot be tested and returns
 <code>ErrNotUsable</code>.</p>
@@ -1323,6 +1406,10 @@ normal outcome that is recorded; read it from the returned connection:</p>
 <tr>
 <td><code>ErrNotUsable</code></td>
 <td>The connection's state does not allow it</td>
+</tr>
+<tr>
+<td><code>ErrAccountMismatch</code></td>
+<td>A reconnect's credential belongs to a different account</td>
 </tr>
 <tr>
 <td><code>ErrConflict</code></td>

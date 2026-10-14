@@ -16,7 +16,7 @@
         <link rel="prev" href="../PLAN/">
       
       
-        <link rel="next" href="../../../../releases/v0.1.0/">
+        <link rel="next" href="../../../../releases/v0.2.0/">
       
       
         
@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../releases/v0.2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.2.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../releases/v0.1.0/" class="md-nav__link">
         
   
@@ -1096,9 +1124,9 @@ agent-delegated authorization, and a remote service mode.</p>
 <ul>
 <li>[ ] <code>RMI-CONNECTIONFORGE-016</code> Scheduled validation and health: stoppable scheduler, backoff, needs-attention transitions, overdue reporting</li>
 <li>Depends on: <code>RMI-CONNECTIONFORGE-010</code></li>
-<li>[ ] <code>RMI-CONNECTIONFORGE-017</code> Credential replacement and rotation with two coexisting versions and validate-before-activate</li>
+<li>[x] <code>RMI-CONNECTIONFORGE-017</code> Credential replacement and rotation with two coexisting versions and validate-before-activate</li>
 <li>Depends on: <code>RMI-CONNECTIONFORGE-013</code></li>
-<li>[ ] <code>RMI-CONNECTIONFORGE-018</code> Grants and bindings: enforcement through the <code>Authorizer</code>, binding-aware disconnect</li>
+<li>[ ] <code>RMI-CONNECTIONFORGE-018</code> Grants and bindings: enforcement through the <code>Authorizer</code>, binding-aware disconnect. Bindings are listed, bound and unbound through the service; grants are held by the host's authorization (SystemForge uses its resource grants), so what remains is a disconnect that requires acknowledging its bindings</li>
 <li>Depends on: <code>RMI-CONNECTIONFORGE-010</code></li>
 <li>[ ] <code>RMI-CONNECTIONFORGE-019</code> Status model and metrics interface: states, health, expiring credentials, failing connections</li>
 <li>Depends on: <code>RMI-CONNECTIONFORGE-016</code></li>

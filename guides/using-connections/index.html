@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.2.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.1.0/" class="md-nav__link">
         
   
@@ -1091,13 +1119,17 @@ person to reconnect, not a raw error.</p>
 <h2 id="dependencies-are-visible">Dependencies are visible<a class="headerlink" href="#dependencies-are-visible" title="Permanent link">&para;</a></h2>
 <p>Record a <strong>binding</strong> when a feature starts depending on a connection, so a
 disconnect can show what would stop working:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">PutBinding</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">Binding</span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">Owner</span><span class="p">:</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">ConnectionID</span><span class="p">:</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">Consumer</span><span class="p">:</span><span class="w"> </span><span class="nx">cf</span><span class="p">.</span><span class="nx">Consumer</span><span class="p">{</span><span class="nx">Kind</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dashboards&quot;</span><span class="p">},</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">Purpose</span><span class="p">:</span><span class="w">  </span><span class="s">&quot;traffic&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">})</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">Bind</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">actor</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">cf</span><span class="p">.</span><span class="nx">Consumer</span><span class="p">{</span><span class="nx">Kind</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dashboards&quot;</span><span class="p">},</span><span class="w"> </span><span class="s">&quot;traffic&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>Bindings are idempotent, and deleting a connection removes them.</p>
+<p>Bindings are idempotent, and deleting a connection removes them. Through
+the service, <code>Bind</code> and <code>Unbind</code> require <strong>use</strong>, so whoever may use a
+connection may say that a feature depends on it, and <code>Bindings</code> lists them for
+anyone who may view it. Show that list before a disconnect:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">bs</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">Bindings</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">actor</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1">// &quot;Disconnecting stops: portfolio.site impactchiefs.com (traffic)&quot;</span>
+</code></pre></div>
+<p>A <a href="../connections/#reconnect">reconnect</a> leaves bindings untouched.</p>
 
 
 
