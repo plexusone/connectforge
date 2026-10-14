@@ -1,63 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://plexusone.github.io/connectionforge/</loc>
+         <loc>https://plexusone.github.io/connectforge/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/getting-started/</loc>
+         <loc>https://plexusone.github.io/connectforge/getting-started/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/connections/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/connections/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/host-integration/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/host-integration/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/providers/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/providers/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/security/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/security/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/storage/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/storage/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/guides/using-connections/</loc>
+         <loc>https://plexusone.github.io/connectforge/guides/using-connections/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/releases/v0.1.0/</loc>
+         <loc>https://plexusone.github.io/connectforge/releases/v0.1.0/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/releases/v0.2.0/</loc>
+         <loc>https://plexusone.github.io/connectforge/releases/v0.2.0/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/specs/initiatives/INIT-CONNECTIONFORGE-001/PLAN/</loc>
+         <loc>https://plexusone.github.io/connectforge/releases/v0.3.0/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/specs/initiatives/INIT-CONNECTIONFORGE-001/PRD/</loc>
+         <loc>https://plexusone.github.io/connectforge/specs/initiatives/INIT-CONNECTFORGE-001/PLAN/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/specs/initiatives/INIT-CONNECTIONFORGE-001/ROADMAP/</loc>
+         <loc>https://plexusone.github.io/connectforge/specs/initiatives/INIT-CONNECTFORGE-001/PRD/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
     <url>
-         <loc>https://plexusone.github.io/connectionforge/specs/initiatives/INIT-CONNECTIONFORGE-001/TRD/</loc>
+         <loc>https://plexusone.github.io/connectforge/specs/initiatives/INIT-CONNECTFORGE-001/ROADMAP/</loc>
+         <lastmod>2026-10-14</lastmod>
+    </url>
+    <url>
+         <loc>https://plexusone.github.io/connectforge/specs/initiatives/INIT-CONNECTFORGE-001/TRD/</loc>
          <lastmod>2026-10-14</lastmod>
     </url>
 </urlset>
