@@ -58,12 +58,14 @@ module is built so that:
 
 ## Known limitations
 
-- **Static API tokens only** in v0.1.0. OAuth with refresh, GitHub App
-  installations and credential replacement are planned.
+- **Static API tokens only.** OAuth with refresh and GitHub App
+  installations are planned. A credential is replaced in place with
+  `Reconnect`.
 - **A client holds the credential it was made with.** A disconnect applies to
   the next client.
-- **Grants and bindings are stored but not yet managed** by the service; your
-  `Authorizer` decides.
+- **Grants are the host's.** Your `Authorizer` decides who may view, use or
+  manage a connection. Bindings are managed by the service, but a disconnect
+  does not yet require acknowledging them.
 - **Rate-limit observation, DPoP and agent-delegated authorization** are not
   implemented. The model leaves room for them: a connection is not
   synonymous with a stored secret.
