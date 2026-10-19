@@ -57,6 +57,63 @@ type AuthMethod struct {
 	// credential, or "chosen" by the person from a list.
 	AccountSelection string `json:"accountSelection,omitempty"`
 	HelpURL          string `json:"helpUrl,omitempty"`
+	// Setup is what a person does, in order, to create the credential at
+	// the service before entering it.
+	Setup []SetupStep `json:"setup,omitempty"`
+	// Rotation lists the ways the credential can be replaced over its life,
+	// with what each needs. Empty means the method does not describe
+	// rotation; a person replaces the credential by reconnecting.
+	Rotation []RotationMode `json:"rotation,omitempty"`
+}
+
+// SetupStep is one step of creating a credential at the service.
+type SetupStep struct {
+	Title string `json:"title"`
+	// Detail explains the step in plain text.
+	Detail string `json:"detail,omitempty"`
+	// URL opens the page at the service where the step is done.
+	URL string `json:"url,omitempty"`
+	// Rotation limits the step to these rotation mode keys; empty means
+	// every mode.
+	Rotation []string `json:"rotation,omitempty"`
+}
+
+// Rotation mode keys a host may act on. A provider may describe others; a
+// host that does not know a mode does not offer it.
+const (
+	// RotationManual means a person replaces the credential, for example
+	// before it expires.
+	RotationManual = "manual"
+	// RotationAutomatic means the host replaces the credential on a
+	// schedule, which usually needs more permission at the service.
+	RotationAutomatic = "automatic"
+)
+
+// RotationMode is one way a credential is replaced over its life.
+type RotationMode struct {
+	Key         string `json:"key"`
+	Label       string `json:"label"`
+	Description string `json:"description,omitempty"`
+	// Scopes are the permissions the credential needs in this mode in
+	// addition to the method's.
+	Scopes []Scope `json:"scopes,omitempty"`
+	// Risks say what those extra permissions also allow, so a person can
+	// weigh the mode before choosing it.
+	Risks []string `json:"risks,omitempty"`
+	// ExpiryDays is the lifetime to give the credential when creating it,
+	// for services that support one; 0 means no expiry.
+	ExpiryDays int `json:"expiryDays,omitempty"`
+	// Recommended marks the mode to offer first. At most one mode is.
+	Recommended bool `json:"recommended,omitempty"`
+}
+
+// RotationMode returns the method's rotation mode with key.
+func (a AuthMethod) RotationMode(key string) (RotationMode, bool) {
+	i := slices.IndexFunc(a.Rotation, func(r RotationMode) bool { return r.Key == key })
+	if i < 0 {
+		return RotationMode{}, false
+	}
+	return a.Rotation[i], true
 }
 
 // Field is an input a method needs.
@@ -113,6 +170,48 @@ func (m Manifest) Validate() error {
 	for _, a := range m.AuthMethods {
 		if a.Key == "" || len(a.Fields) == 0 {
 			return fmt.Errorf("provider %s: auth method %q needs a key and fields", m.Key, a.Key)
+		}
+		if err := a.validateGuidance(); err != nil {
+			return fmt.Errorf("provider %s: auth method %q: %w", m.Key, a.Key, err)
+		}
+	}
+	return nil
+}
+
+// validateGuidance checks the setup steps and rotation modes.
+func (a AuthMethod) validateGuidance() error {
+	seen := map[string]bool{}
+	recommended := 0
+	for _, r := range a.Rotation {
+		switch {
+		case r.Key == "" || r.Label == "":
+			return errors.New("a rotation mode needs a key and a label")
+		case seen[r.Key]:
+			return fmt.Errorf("rotation mode %q is listed twice", r.Key)
+		case r.ExpiryDays < 0:
+			return fmt.Errorf("rotation mode %q has a negative expiry", r.Key)
+		}
+		seen[r.Key] = true
+		if r.Recommended {
+			recommended++
+		}
+	}
+	if recommended > 1 {
+		return errors.New("more than one rotation mode is recommended")
+	}
+	for _, st := range a.Setup {
+		if st.Title == "" {
+			return errors.New("a setup step needs a title")
+		}
+		if st.URL != "" {
+			if u, err := url.Parse(st.URL); err != nil || u.Scheme != "https" || u.Host == "" {
+				return fmt.Errorf("setup step %q: the link must be an https URL", st.Title)
+			}
+		}
+		for _, k := range st.Rotation {
+			if !seen[k] {
+				return fmt.Errorf("setup step %q names rotation mode %q, which is not listed", st.Title, k)
+			}
 		}
 	}
 	return nil
