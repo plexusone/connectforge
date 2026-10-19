@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -126,6 +127,49 @@ func TestClassify(t *testing.T) {
 		var se *provider.StatusError
 		if !errors.Is(err, want) || !errors.As(err, &se) || se.RequestID != "ray-1" || se.Status != status {
 			t.Errorf("%d: %v", status, err)
+		}
+	}
+}
+
+func TestManifestGuidance(t *testing.T) {
+	good := manifest("cloudflare")
+	good.AuthMethods[0].Rotation = []provider.RotationMode{
+		{Key: provider.RotationManual, Label: "Manual", ExpiryDays: 90, Recommended: true},
+		{Key: provider.RotationAutomatic, Label: "Automatic",
+			Scopes: []provider.Scope{{Name: "API Tokens:Edit", Required: true}}, Risks: []string{"can create tokens"}},
+	}
+	good.AuthMethods[0].Setup = []provider.SetupStep{
+		{Title: "Open API Tokens", URL: "https://dash.example/profile/api-tokens"},
+		{Title: "Add the token permission", Rotation: []string{provider.RotationAutomatic}},
+	}
+	if err := good.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	m, _ := good.Method("api_token")
+	if r, ok := m.RotationMode(provider.RotationAutomatic); !ok || len(r.Scopes) != 1 {
+		t.Fatalf("rotation mode: %+v, %v", r, ok)
+	}
+	if _, ok := m.RotationMode("weekly"); ok {
+		t.Fatal("unknown rotation mode found")
+	}
+
+	for name, change := range map[string]func(*provider.AuthMethod){
+		"mode key":      func(a *provider.AuthMethod) { a.Rotation[0].Key = "" },
+		"mode label":    func(a *provider.AuthMethod) { a.Rotation[0].Label = "" },
+		"duplicate":     func(a *provider.AuthMethod) { a.Rotation[1].Key = provider.RotationManual },
+		"expiry":        func(a *provider.AuthMethod) { a.Rotation[0].ExpiryDays = -1 },
+		"recommended":   func(a *provider.AuthMethod) { a.Rotation[1].Recommended = true },
+		"step title":    func(a *provider.AuthMethod) { a.Setup[0].Title = "" },
+		"step link":     func(a *provider.AuthMethod) { a.Setup[0].URL = "http://dash.example/" },
+		"step relative": func(a *provider.AuthMethod) { a.Setup[0].URL = "/profile" },
+		"step mode":     func(a *provider.AuthMethod) { a.Setup[1].Rotation = []string{"weekly"} },
+	} {
+		bad := manifest("cloudflare")
+		bad.AuthMethods[0].Rotation = slices.Clone(good.AuthMethods[0].Rotation)
+		bad.AuthMethods[0].Setup = slices.Clone(good.AuthMethods[0].Setup)
+		change(&bad.AuthMethods[0])
+		if err := bad.Validate(); err == nil {
+			t.Errorf("%s: invalid guidance accepted", name)
 		}
 	}
 }
