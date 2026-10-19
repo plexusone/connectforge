@@ -75,6 +75,9 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTFORGE-016`
 - [ ] `RMI-CONNECTFORGE-020` Provider conformance suite and recorded-fixture harness for adapters
   - Depends on: `RMI-CONNECTFORGE-007`, `RMI-CONNECTFORGE-011`
+- [ ] `RMI-CONNECTFORGE-028` Setup steps and rotation modes in an auth method's manifest, so an interface can guide a person through creating a credential
+- [ ] `RMI-CONNECTFORGE-029` Credential expiry from validation, recorded on the credential and in a connection's health
+- [ ] `RMI-CONNECTFORGE-030` Roll a credential through its provider, for providers whose service can issue a replacement
 
 ## Phase 5 — Hardening and v0.1.0
 

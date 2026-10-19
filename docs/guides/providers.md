@@ -23,13 +23,41 @@ and an agent can read what a connection needs. It contains no code.
 | `Key` | Identifies the provider, for example `cloudflare` |
 | `DisplayName` | Shown to people |
 | `BaseURLs` | The **only** origins a request for this provider may reach |
-| `AuthMethods` | One or more ways to connect: `Key`, `Fields`, `Scopes`, `AccountSelection`, `HelpURL` |
+| `AuthMethods` | One or more ways to connect: `Key`, `Fields`, `Scopes`, `AccountSelection`, `HelpURL`, and the guidance `Setup` and `Rotation` |
 | `HelpURL` | Where a person learns to create the credential |
 
 A **field** is an input: `Name`, `Label`, `Secret`, `Required` and `Help`. A
 **scope** names a permission the credential should hold, with a description
 and whether it is required, so an interface can tell a person which
 permissions to grant.
+
+An auth method can guide a person through creating the credential, so an
+interface can render a step-by-step setup instead of a bare form:
+
+- `Setup` is ordered `SetupStep`s: a `Title`, a `Detail`, an optional `https`
+  `URL` that opens the page at the service, and the `Rotation` modes the step
+  applies to (empty means every mode).
+- `Rotation` lists `RotationMode`s, the ways the credential is replaced over
+  its life. `RotationManual` means a person replaces it, for example before
+  it expires; `RotationAutomatic` means the host replaces it on a schedule.
+  Each mode names the extra `Scopes` it needs, the `Risks` those scopes add,
+  the `ExpiryDays` to give the credential when creating it, and whether it is
+  `Recommended` (at most one is).
+
+```go
+AuthMethods: []provider.AuthMethod{{
+	Key:    "api_token",
+	Fields: []provider.Field{{Name: "token", Label: "API token", Secret: true, Required: true}},
+	Rotation: []provider.RotationMode{{
+		Key: provider.RotationManual, Label: "Rotate it myself", ExpiryDays: 90, Recommended: true,
+	}},
+	Setup: []provider.SetupStep{
+		{Title: "Open API Tokens", URL: "https://dash.cloudflare.com/profile/api-tokens"},
+		{Title: "Create a custom token", Detail: "Grant the permissions below, limited to your zones."},
+		{Title: "Set the token to expire", Detail: "Choose an end date 90 days from today."},
+	},
+}},
+```
 
 `BaseURLs` are part of the security model: they are the egress allow-list.
 Give a provider with regions or editions one provider per host, or a
@@ -54,7 +82,7 @@ p, err := apikey.New(apikey.Config{
 		}},
 	},
 	// Proves the token works.
-	Verify: apikey.Request{Path: "/client/v4/user/tokens/verify"},
+	Verify: apikey.Request{Path: "/client/v4/user/tokens/verify", ExpiresAtPath: "result.expires_on"},
 	// A second request discovers the account, when the first does not name it.
 	Account: &apikey.Request{
 		Path:             "/client/v4/accounts?per_page=50",
@@ -74,8 +102,14 @@ p, err := apikey.New(apikey.Config{
 | `Account` | none | A second GET that discovers the account |
 
 A `Request` has a `Path` and dot-separated paths into the JSON response, where
-a number indexes an array: `AccountIDPath`, `AccountLabelPath`, and
-`ScopesPath` for an array of strings.
+a number indexes an array: `AccountIDPath`, `AccountLabelPath`, `ScopesPath`
+for an array of strings, and `ExpiresAtPath` for the token's expiry as an
+RFC 3339 timestamp. A missing or unparseable expiry leaves it unknown rather
+than failing validation.
+
+When a provider reports an expiry, the service records it on the credential
+and in the connection's `Health.CredentialExpiresAt`, so an interface can say
+when the credential must be replaced.
 
 ## Writing your own
 

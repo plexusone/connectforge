@@ -118,8 +118,16 @@ type Health struct {
     LastValidation   Outcome   // ok, failed, unknown
     LastError        string    // classified, never containing a secret
     ConsecutiveFails int
+    // CredentialExpiresAt is when the current credential stops working, as
+    // the provider reported at the last successful validation.
+    CredentialExpiresAt *time.Time
 }
 ```
+
+A provider reports a credential's expiry in its validation `Result`. `Create`,
+a successful `Test` and `Reconnect` record it in `Health` and on the sealed
+`Credential`; a failed `Test` keeps the last known value. `Health` is stored
+as one JSON value, so the field needs no schema change.
 
 Rate-limit observations join `Health` when rate-limit tracking is added.
 
@@ -356,6 +364,30 @@ read what a connection needs:
 Property names are camelCase (a document format owned here). A manifest
 never contains executable content. Secret fields are never echoed back by
 any API.
+
+An auth method may also guide a person through creating the credential:
+
+```json
+"setup": [
+  {"title": "Open API Tokens", "url": "https://dash.cloudflare.com/profile/api-tokens"},
+  {"title": "Allow the token to roll itself", "rotation": ["automatic"]}
+],
+"rotation": [
+  {"key": "manual", "label": "Rotate it myself", "expiryDays": 90, "recommended": true},
+  {"key": "automatic", "label": "Rotate it for me",
+   "scopes": [{"name": "API Tokens: Edit", "required": true}],
+   "risks": ["The token can also create other tokens"]}
+]
+```
+
+`setup` is ordered steps, each with an optional `https` link and the rotation
+modes it applies to. `rotation` lists the ways the credential is replaced:
+each mode's extra `scopes`, the `risks` those scopes add, the lifetime to set
+when creating the credential (`expiryDays`), and at most one `recommended`
+mode. `manual` and `automatic` are the keys a host acts on; a host does not
+offer a mode it does not know. Validation rejects a step without a title, a
+non-`https` link, a step naming an unlisted mode, duplicate or unlabeled
+modes, and more than one recommended mode.
 
 ### Reference providers
 
