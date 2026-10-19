@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"slices"
 	"sync"
+	"time"
 )
 
 // Provider is an adapter for one external service.
@@ -33,6 +34,9 @@ type Result struct {
 	// Scopes are the permissions the provider reports for the credential,
 	// if it reports them.
 	Scopes []string
+	// ExpiresAt is when the credential stops working, if the provider
+	// reports it; nil when it does not expire or the provider does not say.
+	ExpiresAt *time.Time
 }
 
 // Manifest describes a provider so a user interface can render a connection

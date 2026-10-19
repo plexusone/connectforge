@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	cf "github.com/plexusone/connectforge"
 	"github.com/plexusone/connectforge/provider"
@@ -48,6 +49,9 @@ type Request struct {
 	AccountLabelPath string
 	// ScopesPath, if set, names an array of strings.
 	ScopesPath string
+	// ExpiresAtPath, if set, names the token's expiry as an RFC 3339
+	// timestamp; a missing or empty value means the token does not expire.
+	ExpiresAtPath string
 }
 
 // Provider is a static-token provider.
@@ -122,6 +126,9 @@ func (p *Provider) Validate(ctx context.Context, hc *http.Client, m provider.Mat
 		if a.Scopes != nil {
 			res.Scopes = a.Scopes
 		}
+		if a.ExpiresAt != nil {
+			res.ExpiresAt = a.ExpiresAt
+		}
 	}
 	return res, nil
 }
@@ -161,6 +168,14 @@ func extract(doc any, r Request) provider.Result {
 	res := provider.Result{
 		AccountID:    asString(lookup(doc, r.AccountIDPath)),
 		AccountLabel: asString(lookup(doc, r.AccountLabelPath)),
+	}
+	if s := asString(lookup(doc, r.ExpiresAtPath)); s != "" {
+		// A value that is not a timestamp is ignored rather than failing
+		// validation: the token works, only its expiry is unknown.
+		if t, err := time.Parse(time.RFC3339, s); err == nil {
+			t = t.UTC()
+			res.ExpiresAt = &t
+		}
 	}
 	if r.ScopesPath != "" {
 		if arr, ok := lookup(doc, r.ScopesPath).([]any); ok {

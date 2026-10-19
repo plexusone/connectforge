@@ -73,6 +73,10 @@ type Health struct {
 	LastValidation   Outcome   `json:"lastValidation,omitempty"`
 	LastError        string    `json:"lastError,omitempty"`
 	ConsecutiveFails int       `json:"consecutiveFails,omitempty"`
+	// CredentialExpiresAt is when the current credential stops working, as
+	// the provider reported at the last successful validation; nil when it
+	// does not expire or the provider does not say.
+	CredentialExpiresAt *time.Time `json:"credentialExpiresAt,omitempty"`
 }
 
 // Connection is an owner's relationship with one account at a provider. It
@@ -100,6 +104,10 @@ type Connection struct {
 func (c Connection) Clone() Connection {
 	c.Scopes = slices.Clone(c.Scopes)
 	c.Metadata = maps.Clone(c.Metadata)
+	if c.Health.CredentialExpiresAt != nil {
+		t := *c.Health.CredentialExpiresAt
+		c.Health.CredentialExpiresAt = &t
+	}
 	return c
 }
 
