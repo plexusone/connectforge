@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	cf "github.com/plexusone/connectforge"
 	"github.com/plexusone/connectforge/internal/fakeapi"
@@ -86,6 +87,33 @@ func TestNewChecksConfig(t *testing.T) {
 	} {
 		if _, err := apikey.New(cfg); err == nil {
 			t.Errorf("%s: bad config accepted", name)
+		}
+	}
+}
+
+func TestValidateReadsTheExpiry(t *testing.T) {
+	api := fakeapi.Start(t)
+	p := api.Provider(t)
+	want, err := time.Parse(time.RFC3339, fakeapi.Expiry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := p.Validate(context.Background(), api.Client(), material(fakeapi.Good))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.ExpiresAt == nil || !res.ExpiresAt.Equal(want) {
+		t.Fatalf("expiry: %v, want %v", res.ExpiresAt, want)
+	}
+	// No expiry, and an expiry that is not a timestamp, both leave it unknown
+	// without failing validation.
+	for _, tok := range []string{fakeapi.Rotated, fakeapi.BadExpiry} {
+		res, err := p.Validate(context.Background(), api.Client(), material(tok))
+		if err != nil {
+			t.Fatalf("%s: %v", tok, err)
+		}
+		if res.ExpiresAt != nil {
+			t.Fatalf("%s: expiry %v, want none", tok, res.ExpiresAt)
 		}
 	}
 }

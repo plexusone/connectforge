@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	cf "github.com/plexusone/connectforge"
 	"github.com/plexusone/connectforge/broker"
@@ -592,5 +593,43 @@ func TestBindings(t *testing.T) {
 	// one with nothing to remove); a refusal is access.denied, not this.
 	if changed != 5 {
 		t.Fatalf("binding events: %d in %v", changed, got)
+	}
+}
+
+func TestExpiryIsRecorded(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	want, err := time.Parse(time.RFC3339, fakeapi.Expiry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Health.CredentialExpiresAt == nil || !c.Health.CredentialExpiresAt.Equal(want) {
+		t.Fatalf("created: expiry %v, want %v", c.Health.CredentialExpiresAt, want)
+	}
+	cr, err := e.store.ActiveCredential(ctx, owner, c.ID)
+	if err != nil || cr.ExpiresAt == nil || !cr.ExpiresAt.Equal(want) {
+		t.Fatalf("credential expiry: %v, %v", cr.ExpiresAt, err)
+	}
+
+	// A failed test keeps the last known expiry; a successful one refreshes it.
+	e.api.Revoke(fakeapi.Good)
+	if c, err = e.svc.Test(ctx, owner, agent, c.ID); err != nil || c.Health.CredentialExpiresAt == nil {
+		t.Fatalf("failed test: %+v, %v", c.Health, err)
+	}
+	e.api.Restore(fakeapi.Good)
+	if c, err = e.svc.Test(ctx, owner, agent, c.ID); err != nil || !c.Health.CredentialExpiresAt.Equal(want) {
+		t.Fatalf("passed test: %+v, %v", c.Health, err)
+	}
+
+	// Replacing it with a token that does not expire clears the expiry.
+	if c, err = e.reconnect(t, admin, c.ID, fakeapi.Rotated); err != nil || c.Health.CredentialExpiresAt != nil {
+		t.Fatalf("reconnected: %+v, %v", c.Health, err)
+	}
+	if cr, err = e.store.ActiveCredential(ctx, owner, c.ID); err != nil || cr.Version != 2 || cr.ExpiresAt != nil {
+		t.Fatalf("replaced credential: version %d, expiry %v, %v", cr.Version, cr.ExpiresAt, err)
 	}
 }

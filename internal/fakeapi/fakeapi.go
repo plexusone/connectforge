@@ -29,6 +29,10 @@ const (
 	NotJSON      = "fake-notjson-token"
 	AccountID    = "acct-1"
 	Label        = "Acme Production"
+	// Good expires at Expiry; Rotated does not expire; BadExpiry reports an
+	// expiry that is not a timestamp.
+	Expiry    = "2027-01-15T00:00:00Z"
+	BadExpiry = "fake-badexpiry-token"
 )
 
 // API is a running fake API.
@@ -90,11 +94,18 @@ func (a *API) serve(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "oops", http.StatusServiceUnavailable)
 	case tok == NotJSON:
 		_, _ = w.Write([]byte("hello")) //nolint:errcheck // test server: a failed write fails the client side
-	case tok != Good && tok != Rotated && tok != OtherAccount:
+	case tok != Good && tok != Rotated && tok != OtherAccount && tok != BadExpiry:
 		http.Error(w, "invalid token "+tok, http.StatusUnauthorized)
 	case r.URL.Path == "/verify":
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = fmt.Fprint(w, `{"result":{"id":"tok-1","status":"active","scopes":["zone:read","analytics:read"]}}`) //nolint:errcheck // as above
+		expires := ""
+		switch tok {
+		case Good:
+			expires = Expiry
+		case BadExpiry:
+			expires = "soon"
+		}
+		_, _ = fmt.Fprintf(w, `{"result":{"id":"tok-1","status":"active","expires_on":%q,"scopes":["zone:read","analytics:read"]}}`, expires) //nolint:errcheck // as above
 	case r.URL.Path == "/accounts":
 		w.Header().Set("Content-Type", "application/json")
 		id, name := AccountID, Label
@@ -127,7 +138,7 @@ func (a *API) Provider(t testing.TB) *apikey.Provider {
 	t.Helper()
 	p, err := apikey.New(apikey.Config{
 		Manifest: a.Manifest(),
-		Verify:   apikey.Request{Path: "/verify", ScopesPath: "result.scopes"},
+		Verify:   apikey.Request{Path: "/verify", ScopesPath: "result.scopes", ExpiresAtPath: "result.expires_on"},
 		Account:  &apikey.Request{Path: "/accounts", AccountIDPath: "result.0.id", AccountLabelPath: "result.0.name"},
 	})
 	if err != nil {
