@@ -42,6 +42,7 @@ func Run(t *testing.T, newStore func(t *testing.T) cf.Store) {
 		{"UpdateCompareAndSwap", testUpdateCompareAndSwap},
 		{"UpdateEnforcesTransitions", testUpdateEnforcesTransitions},
 		{"ReturnsCopies", testReturnsCopies},
+		{"HealthRoundTrip", testHealthRoundTrip},
 		{"CredentialSwap", testCredentialSwap},
 		{"ConcurrentCredentialSwap", testConcurrentCredentialSwap},
 		{"GrantsAndBindings", testGrantsAndBindings},
@@ -248,6 +249,46 @@ func testReturnsCopies(t *testing.T, s cf.Store) {
 	a, err := s.ActiveCredential(ctx, ownerA, "c1")
 	if err != nil || string(a.Ciphertext) != "sealed-1" {
 		t.Fatalf("credential shares memory: %q, %v", a.Ciphertext, err)
+	}
+}
+
+// testHealthRoundTrip checks that a connection's health, including the
+// credential's expiry, is stored and read back, is not shared with callers,
+// and is cleared when a replaced credential reports none.
+func testHealthRoundTrip(t *testing.T, s cf.Store) {
+	ctx := context.Background()
+	c := mustCreate(t, s, conn(ownerA, "c1", "cloudflare"))
+	checked := time.Date(2026, 1, 3, 0, 0, 0, 0, time.UTC)
+	exp := time.Date(2026, 4, 3, 0, 0, 0, 0, time.UTC)
+	c.State = cf.StateConnected
+	stored := exp // the store gets its own copy, so exp stays the expected value
+	c.Health = cf.Health{LastValidatedAt: checked, LastValidation: cf.OutcomeOK, CredentialExpiresAt: &stored}
+	c, err := s.UpdateConnection(ctx, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.GetConnection(ctx, ownerA, "c1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := got.Health
+	if !h.LastValidatedAt.Equal(checked) || h.LastValidation != cf.OutcomeOK ||
+		h.CredentialExpiresAt == nil || !h.CredentialExpiresAt.Equal(exp) {
+		t.Fatalf("health: %+v", h)
+	}
+	*got.Health.CredentialExpiresAt = checked
+	again, err := s.GetConnection(ctx, ownerA, "c1")
+	if err != nil || again.Health.CredentialExpiresAt == nil || !again.Health.CredentialExpiresAt.Equal(exp) {
+		t.Fatalf("expiry shares memory with callers: %+v, %v", again.Health, err)
+	}
+
+	c.Health.CredentialExpiresAt = nil
+	if _, err := s.UpdateConnection(ctx, c); err != nil {
+		t.Fatal(err)
+	}
+	list, err := s.ListConnections(ctx, ownerA, cf.Filter{})
+	if err != nil || len(list) != 1 || list[0].Health.CredentialExpiresAt != nil {
+		t.Fatalf("cleared expiry: %+v, %v", list, err)
 	}
 }
 
