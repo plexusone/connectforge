@@ -48,6 +48,12 @@ Every store enforces the transition table; a change it forbids returns
 | `LastValidation` | `ok`, `failed` or `unknown` |
 | `LastError` | A classified message with the status and the provider's request ID. Never a response body |
 | `ConsecutiveFails` | Failed checks in a row; reset by a success |
+| `CredentialExpiresAt` | When the current credential stops working, as the provider reported at the last successful check; empty when it does not expire or the provider does not say |
+
+The expiry is refreshed by `Create`, a successful `Test` and `Reconnect`, and
+is also recorded on the sealed credential. Show it next to the connection so
+a person replaces the credential before it lapses rather than after a feature
+fails.
 
 ## Failures are classified
 
@@ -81,7 +87,9 @@ your `Authorizer` and records an audit event.
 ### Reconnect
 
 A token expires, is revoked, or is rotated. `Reconnect` puts the connection
-right without creating a new one, so the features bound to it keep working:
+right without creating a new one, so the features bound to it keep working.
+It is also how a person rotates a credential by hand: create the new token
+before `CredentialExpiresAt`, then reconnect with it.
 
 ```go
 conn, err := svc.Reconnect(ctx, service.ReconnectInput{

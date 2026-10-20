@@ -62,6 +62,10 @@ starts and on a schedule, and show the person `Health.LastError` when a check
 fails. For a feature that cannot proceed, return a message that tells the
 person to reconnect, not a raw error.
 
+When `Health.CredentialExpiresAt` is set, a feature can warn ahead of time:
+a credential that expires in a few days still works, but the person who
+manages the connection should replace it now.
+
 ## Dependencies are visible
 
 Record a **binding** when a feature starts depending on a connection, so a

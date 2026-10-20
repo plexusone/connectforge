@@ -61,6 +61,10 @@ module is built so that:
 - **Static API tokens only.** OAuth with refresh and GitHub App
   installations are planned. A credential is replaced in place with
   `Reconnect`.
+- **Rotation is described, not performed.** A manifest can describe automatic
+  rotation, but connectforge does not replace credentials on a schedule; a
+  host that offers it implements it. The credential's expiry is recorded when
+  the provider reports it, and nothing yet warns before it passes.
 - **A client holds the credential it was made with.** A disconnect applies to
   the next client.
 - **Grants are the host's.** Your `Authorizer` decides who may view, use or

@@ -118,6 +118,41 @@ and reassigned. Every store method takes the owner and returns
 With PostgreSQL you can enforce this a second time in the database with
 row-level security. See [Storage](storage.md#row-level-security).
 
+## Guiding a person through connecting
+
+A provider's manifest carries what an interface needs to walk a person
+through creating a credential, so a host does not hard-code instructions per
+service. Read the manifests from the registry:
+
+```go
+for _, m := range providers.Manifests() {
+	for _, a := range m.AuthMethods {
+		// a.Fields: what to ask for
+		// a.Scopes: the permissions the credential needs
+		// a.Setup: ordered steps, each with an optional link to the service
+		// a.Rotation: the ways the credential is replaced over its life
+	}
+}
+```
+
+- **Setup steps** are shown in order. A step whose `Rotation` names modes
+  applies only when the person chose one of them; a step without it always
+  applies.
+- **Rotation modes** let the person choose how the credential is replaced.
+  Show each mode's `Scopes` and `Risks`, so the person weighs the extra
+  permission a mode needs before choosing it, and its `ExpiryDays`, the
+  lifetime to give the credential. Offer the `Recommended` mode first.
+  `RotationManual` means the person reconnects with a new credential;
+  `RotationAutomatic` means the host replaces it on a schedule. A host that
+  does not implement a mode does not offer it.
+- **The chosen mode is the host's to keep.** connectforge describes the modes
+  but does not store a choice; record it in the connection's `Metadata` at
+  `Create`, and check it against `AuthMethod.RotationMode`.
+
+`Manifest.Validate` checks the guidance when a provider is registered: setup
+links are `https`, each mode has a key and a label, no mode is listed twice,
+at most one is recommended, and a step names only modes the method lists.
+
 ## Putting it together
 
 ```go
