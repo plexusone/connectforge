@@ -9,6 +9,69 @@
   ],
   "releases": [
     {
+      "version": "v0.4.0",
+      "date": "2026-10-20",
+      "highlights": [
+        {
+          "description": "Guided setup: an auth method lists the steps a person follows to create a credential at the service, with links"
+        },
+        {
+          "description": "Rotation modes: an auth method describes how its credential is replaced, manual or automatic, with the extra permissions and risks of each"
+        },
+        {
+          "description": "Credential expiry reported by a provider is recorded in the connection's health"
+        },
+        {
+          "description": "No breaking changes"
+        }
+      ],
+      "added": [
+        {
+          "description": "`provider.SetupStep` and `AuthMethod.Setup`: ordered steps with a detail, an `https` link and the rotation modes each applies to",
+          "rmis": [
+            "RMI-CONNECTFORGE-028"
+          ]
+        },
+        {
+          "description": "`provider.RotationMode`, `AuthMethod.Rotation` and `AuthMethod.RotationMode`, with the mode keys `RotationManual` and `RotationAutomatic`; a mode carries extra scopes, risks, an expiry in days and whether it is recommended",
+          "rmis": [
+            "RMI-CONNECTFORGE-028"
+          ]
+        },
+        {
+          "description": "`Manifest.Validate` checks setup steps and rotation modes: `https` links, a key and label per mode, no duplicate modes, at most one recommended, and steps naming only listed modes",
+          "rmis": [
+            "RMI-CONNECTFORGE-028"
+          ]
+        },
+        {
+          "description": "`provider.Result.ExpiresAt` and `Health.CredentialExpiresAt`: `Create`, a successful `Test` and `Reconnect` record a credential's expiry on the sealed credential and in health",
+          "rmis": [
+            "RMI-CONNECTFORGE-029"
+          ]
+        },
+        {
+          "description": "`apikey.Request.ExpiresAtPath` reads a token's expiry from the verification response as an RFC 3339 timestamp; an unparseable value leaves it unknown",
+          "rmis": [
+            "RMI-CONNECTFORGE-029"
+          ]
+        }
+      ],
+      "documentation": [
+        {
+          "description": "The providers guide describes setup steps, rotation modes and expiry; the host integration guide covers guiding a person through connecting; the lifecycle, using and security guides cover expiry and rotation"
+        },
+        {
+          "description": "The security guide's known limitations are up to date"
+        }
+      ],
+      "tests": [
+        {
+          "description": "Manifest setup steps and rotation modes, and reading and recording credential expiry"
+        }
+      ]
+    },
+    {
       "version": "v0.3.0",
       "date": "2026-10-13",
       "highlights": [
