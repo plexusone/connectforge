@@ -16,7 +16,7 @@
         <link rel="prev" href="../PLAN/">
       
       
-        <link rel="next" href="../../../../releases/v0.3.0/">
+        <link rel="next" href="../../../../releases/v0.4.0/">
       
       
         
@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../releases/v0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../releases/v0.3.0/" class="md-nav__link">
         
   
@@ -1146,6 +1174,7 @@ agent-delegated authorization, and a remote service mode.</p>
 <li>Depends on: <code>RMI-CONNECTFORGE-011</code>, <code>RMI-CONNECTFORGE-013</code></li>
 <li>[ ] <code>RMI-CONNECTFORGE-015</code> Reconnect and revoke flows, including provider-side revocation where supported</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-013</code></li>
+<li>Note: reconnect shipped in v0.2.0 (<code>Service.Reconnect</code>); provider-side revocation remains</li>
 </ul>
 <h2 id="phase-4-operations">Phase 4 — Operations<a class="headerlink" href="#phase-4-operations" title="Permanent link">&para;</a></h2>
 <p><strong>Theme:</strong> Connections are monitored, replaced and shared safely, and a disconnect says what it would break.</p>
@@ -1154,25 +1183,30 @@ agent-delegated authorization, and a remote service mode.</p>
 <li>Depends on: <code>RMI-CONNECTFORGE-010</code></li>
 <li>[x] <code>RMI-CONNECTFORGE-017</code> Credential replacement and rotation with two coexisting versions and validate-before-activate</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-013</code></li>
-<li>[ ] <code>RMI-CONNECTFORGE-018</code> Grants and bindings: enforcement through the <code>Authorizer</code>, binding-aware disconnect. Bindings are listed, bound and unbound through the service; grants are held by the host's authorization (SystemForge uses its resource grants), so what remains is a disconnect that requires acknowledging its bindings</li>
+<li>[ ] <code>RMI-CONNECTFORGE-018</code> Grants and bindings: enforcement through the <code>Authorizer</code> and a disconnect that requires acknowledging its bindings</li>
+<li>Note: bindings are listed, bound and unbound through the service, and grants are held by the host's authorization (SystemForge uses its resource grants)</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-010</code></li>
 <li>[ ] <code>RMI-CONNECTFORGE-019</code> Status model and metrics interface: states, health, expiring credentials, failing connections</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-016</code></li>
 <li>[ ] <code>RMI-CONNECTFORGE-020</code> Provider conformance suite and recorded-fixture harness for adapters</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-007</code>, <code>RMI-CONNECTFORGE-011</code></li>
+<li>[x] <code>RMI-CONNECTFORGE-028</code> Setup steps and rotation modes in an auth method's manifest, so an interface can guide a person through creating a credential</li>
+<li>[x] <code>RMI-CONNECTFORGE-029</code> Credential expiry from validation, recorded on the credential and in a connection's health</li>
+<li>[ ] <code>RMI-CONNECTFORGE-030</code> Roll a credential through its provider, for providers whose service can issue a replacement</li>
 </ul>
 <h2 id="phase-5-hardening-and-v010">Phase 5 — Hardening and v0.1.0<a class="headerlink" href="#phase-5-hardening-and-v010" title="Permanent link">&para;</a></h2>
 <p><strong>Theme:</strong> An HTTP API, a CLI, documentation, review and the release.</p>
 <ul>
 <li>[ ] <code>RMI-CONNECTFORGE-021</code> <code>httpapi</code> handlers over the service, with no secret in any response and the host's authorizer applied</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-018</code></li>
+<li>Note: SystemForge serves the connections API over the service itself; keep only if a host without its own API needs one</li>
 <li>[ ] <code>RMI-CONNECTFORGE-022</code> CLI (<code>providers</code>, <code>connections</code>, <code>test</code>, <code>disconnect</code>) over the service</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-019</code></li>
-<li>[ ] <code>RMI-CONNECTFORGE-023</code> Documentation: getting started, host integration guide (ports and a reference schema), provider authoring, threat model</li>
+<li>[x] <code>RMI-CONNECTFORGE-023</code> Documentation: getting started, host integration guide (ports and a reference schema), provider authoring, threat model</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-021</code></li>
-<li>[ ] <code>RMI-CONNECTFORGE-024</code> Internal review of broker, refresh and egress; fix findings; record known limitations</li>
+<li>[x] <code>RMI-CONNECTFORGE-024</code> Internal review of broker, refresh and egress; fix findings; record known limitations</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-014</code>, <code>RMI-CONNECTFORGE-020</code></li>
-<li>[ ] <code>RMI-CONNECTFORGE-025</code> v0.1.0 release: changelog, release notes, signed tag after CI on all platforms</li>
+<li>[x] <code>RMI-CONNECTFORGE-025</code> v0.1.0 release: changelog, release notes, signed tag after CI on all platforms</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-022</code>, <code>RMI-CONNECTFORGE-023</code>, <code>RMI-CONNECTFORGE-024</code></li>
 </ul>
 

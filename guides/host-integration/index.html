@@ -603,6 +603,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#guiding-a-person-through-connecting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guiding a person through connecting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#putting-it-together" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -919,6 +930,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.3.0/" class="md-nav__link">
         
   
@@ -1085,6 +1124,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#guiding-a-person-through-connecting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guiding a person through connecting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#putting-it-together" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1238,25 +1288,56 @@ and reassigned. Every store method takes the owner and returns
 <code>ErrNotFound</code> for a record of another owner.</p>
 <p>With PostgreSQL you can enforce this a second time in the database with
 row-level security. See <a href="../storage/#row-level-security">Storage</a>.</p>
+<h2 id="guiding-a-person-through-connecting">Guiding a person through connecting<a class="headerlink" href="#guiding-a-person-through-connecting" title="Permanent link">&para;</a></h2>
+<p>A provider's manifest carries what an interface needs to walk a person
+through creating a credential, so a host does not hard-code instructions per
+service. Read the manifests from the registry:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">providers</span><span class="p">.</span><span class="nx">Manifests</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">AuthMethods</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="c1">// a.Fields: what to ask for</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="c1">// a.Scopes: the permissions the credential needs</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">        </span><span class="c1">// a.Setup: ordered steps, each with an optional link to the service</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="c1">// a.Rotation: the ways the credential is replaced over its life</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>Setup steps</strong> are shown in order. A step whose <code>Rotation</code> names modes
+  applies only when the person chose one of them; a step without it always
+  applies.</li>
+<li><strong>Rotation modes</strong> let the person choose how the credential is replaced.
+  Show each mode's <code>Scopes</code> and <code>Risks</code>, so the person weighs the extra
+  permission a mode needs before choosing it, and its <code>ExpiryDays</code>, the
+  lifetime to give the credential. Offer the <code>Recommended</code> mode first.
+  <code>RotationManual</code> means the person reconnects with a new credential;
+  <code>RotationAutomatic</code> means the host replaces it on a schedule. A host that
+  does not implement a mode does not offer it.</li>
+<li><strong>The chosen mode is the host's to keep.</strong> connectforge describes the modes
+  but does not store a choice; record it in the connection's <code>Metadata</code> at
+  <code>Create</code>, and check it against <code>AuthMethod.RotationMode</code>.</li>
+</ul>
+<p><code>Manifest.Validate</code> checks the guidance when a provider is registered: setup
+links are <code>https</code>, each mode has a key and a label, no mode is listed twice,
+at most one is recommended, and a step names only modes the method lists.</p>
 <h2 id="putting-it-together">Putting it together<a class="headerlink" href="#putting-it-together" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">Postgres</span><span class="p">,</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">WithTxHook</span><span class="p">(</span><span class="nx">setTenant</span><span class="p">))</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">Migrate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">broker</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">broker</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nx">Store</span><span class="p">:</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">Crypto</span><span class="p">:</span><span class="w"> </span><span class="nx">crypto</span><span class="p">,</span><span class="w"> </span><span class="nx">Providers</span><span class="p">:</span><span class="w"> </span><span class="nx">providers</span><span class="p">,</span><span class="w"> </span><span class="nx">Authorizer</span><span class="p">:</span><span class="w"> </span><span class="nx">authz</span><span class="p">,</span><span class="w"> </span><span class="nx">Auditor</span><span class="p">:</span><span class="w"> </span><span class="nx">audit</span><span class="p">,</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="nx">Egress</span><span class="p">:</span><span class="w"> </span><span class="nx">egress</span><span class="p">.</span><span class="nx">Policy</span><span class="p">{},</span><span class="w"> </span><span class="c1">// HTTPS to each provider&#39;s hosts only</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">})</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="p">}</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="nx">svc</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">service</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="nx">Store</span><span class="p">:</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">Broker</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">Providers</span><span class="p">:</span><span class="w"> </span><span class="nx">providers</span><span class="p">,</span><span class="w"> </span><span class="nx">Authorizer</span><span class="p">:</span><span class="w"> </span><span class="nx">authz</span><span class="p">,</span><span class="w"> </span><span class="nx">Auditor</span><span class="p">:</span><span class="w"> </span><span class="nx">audit</span><span class="p">,</span>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="p">})</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">Postgres</span><span class="p">,</span><span class="w"> </span><span class="nx">sqlstore</span><span class="p">.</span><span class="nx">WithTxHook</span><span class="p">(</span><span class="nx">setTenant</span><span class="p">))</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">Migrate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">}</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">broker</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">broker</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="nx">Store</span><span class="p">:</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">Crypto</span><span class="p">:</span><span class="w"> </span><span class="nx">crypto</span><span class="p">,</span><span class="w"> </span><span class="nx">Providers</span><span class="p">:</span><span class="w"> </span><span class="nx">providers</span><span class="p">,</span><span class="w"> </span><span class="nx">Authorizer</span><span class="p">:</span><span class="w"> </span><span class="nx">authz</span><span class="p">,</span><span class="w"> </span><span class="nx">Auditor</span><span class="p">:</span><span class="w"> </span><span class="nx">audit</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="nx">Egress</span><span class="p">:</span><span class="w"> </span><span class="nx">egress</span><span class="p">.</span><span class="nx">Policy</span><span class="p">{},</span><span class="w"> </span><span class="c1">// HTTPS to each provider&#39;s hosts only</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="p">})</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="p">}</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="nx">svc</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">service</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">    </span><span class="nx">Store</span><span class="p">:</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">Broker</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">Providers</span><span class="p">:</span><span class="w"> </span><span class="nx">providers</span><span class="p">,</span><span class="w"> </span><span class="nx">Authorizer</span><span class="p">:</span><span class="w"> </span><span class="nx">authz</span><span class="p">,</span><span class="w"> </span><span class="nx">Auditor</span><span class="p">:</span><span class="w"> </span><span class="nx">audit</span><span class="p">,</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="p">})</span>
 </code></pre></div>
 <p><a href="https://github.com/plexusone/systemforge">SystemForge</a> is an example of a
 host: its <code>connections</code> package composes these ports from its key manager,

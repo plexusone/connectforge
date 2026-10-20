@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.3.0/" class="md-nav__link">
         
   
@@ -1144,6 +1172,9 @@ provider's manifest names.</p>
 starts and on a schedule, and show the person <code>Health.LastError</code> when a check
 fails. For a feature that cannot proceed, return a message that tells the
 person to reconnect, not a raw error.</p>
+<p>When <code>Health.CredentialExpiresAt</code> is set, a feature can warn ahead of time:
+a credential that expires in a few days still works, but the person who
+manages the connection should replace it now.</p>
 <h2 id="dependencies-are-visible">Dependencies are visible<a class="headerlink" href="#dependencies-are-visible" title="Permanent link">&para;</a></h2>
 <p>Record a <strong>binding</strong> when a feature starts depending on a connection, so a
 disconnect can show what would stop working:</p>

@@ -919,6 +919,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.3.0/" class="md-nav__link">
         
   
@@ -1201,12 +1229,18 @@ module is built so that:</p>
 </ul>
 <h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Static API tokens only</strong> in v0.1.0. OAuth with refresh, GitHub App
-  installations and credential replacement are planned.</li>
+<li><strong>Static API tokens only.</strong> OAuth with refresh and GitHub App
+  installations are planned. A credential is replaced in place with
+  <code>Reconnect</code>.</li>
+<li><strong>Rotation is described, not performed.</strong> A manifest can describe automatic
+  rotation, but connectforge does not replace credentials on a schedule; a
+  host that offers it implements it. The credential's expiry is recorded when
+  the provider reports it, and nothing yet warns before it passes.</li>
 <li><strong>A client holds the credential it was made with.</strong> A disconnect applies to
   the next client.</li>
-<li><strong>Grants and bindings are stored but not yet managed</strong> by the service; your
-  <code>Authorizer</code> decides.</li>
+<li><strong>Grants are the host's.</strong> Your <code>Authorizer</code> decides who may view, use or
+  manage a connection. Bindings are managed by the service, but a disconnect
+  does not yet require acknowledging them.</li>
 <li><strong>Rate-limit observation, DPoP and agent-delegated authorization</strong> are not
   implemented. The model leaves room for them: a connection is not
   synonymous with a stored secret.</li>
