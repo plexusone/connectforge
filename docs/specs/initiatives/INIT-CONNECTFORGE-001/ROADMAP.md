@@ -52,6 +52,9 @@ agent-delegated authorization, and a remote service mode.
   - Depends on: `RMI-CONNECTFORGE-009`, `RMI-CONNECTFORGE-027`
 - [ ] `RMI-CONNECTFORGE-012` OAuth authorization code with PKCE: server-side single-use state, allow-listed return destinations, callback handling
   - Depends on: `RMI-CONNECTFORGE-010`
+- [x] `RMI-CONNECTFORGE-031` Token sources: a provider exchanges its stored credential (a service account key) for short-lived access tokens, which the broker keeps per client and replaces before they expire
+  - Depends on: `RMI-CONNECTFORGE-009`
+  - Note: nothing is persisted, so it needs no lease; GitHub App installation tokens (011) use the same capability
 - [ ] `RMI-CONNECTFORGE-013` Single-flight refresh: lease, compare-and-swap, atomic persistence of a rotated refresh token, failure classification
   - Depends on: `RMI-CONNECTFORGE-012`, `RMI-CONNECTFORGE-026`
 - [ ] `RMI-CONNECTFORGE-014` Concurrency and race tests for refresh and installation-token minting

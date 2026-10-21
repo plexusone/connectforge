@@ -137,6 +137,26 @@ func (p *myProvider) Validate(ctx context.Context, hc *http.Client, m provider.M
 }
 ```
 
+### Exchanging a credential for a token
+
+When the stored credential is not sent on requests but exchanged for a
+short-lived access token, implement `provider.TokenSource` as well:
+
+```go
+func (p *myProvider) Token(ctx context.Context, hc *http.Client, m provider.Material) (provider.AccessToken, error) {
+	// Sign a request with the key in m, post it to the token endpoint with hc,
+	// and return the token with its expiry.
+}
+```
+
+The broker mints a token through the restricted client, keeps it until
+`provider.TokenExpiryMargin` before it expires, and sends it on each request,
+so list the token endpoint's origin in the manifest's base URLs beside the
+service's. Concurrent requests share one exchange, and a failed exchange is
+not kept. A token with no expiry is used once. Nothing is stored. Make
+`Authenticate` return `provider.ErrTokenSourceOnly`, and in `Validate` call the
+service with `provider.NewTokenClient(p, m, hc, nil)`.
+
 Rules that keep a provider safe:
 
 - **Use the client you are given.** It is already restricted to the

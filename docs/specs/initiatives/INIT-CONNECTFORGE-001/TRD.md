@@ -325,6 +325,26 @@ type Revoker    interface { Revoke(ctx context.Context, hc *http.Client, m Mater
 type Discoverer interface { Accounts(ctx context.Context, hc *http.Client, m Material) ([]Account, error) }
 ```
 
+A provider whose credential is exchanged for a short-lived access token, such
+as a service account key signed into a token request, also implements
+`TokenSource`:
+
+```go
+type TokenSource interface {
+    Token(ctx context.Context, hc *http.Client, m Material) (AccessToken, error)
+}
+```
+
+The broker detects it by type assertion and, in place of `Authenticate`,
+authenticates each request with a token it mints through the same egress-
+restricted client, so the manifest lists the token endpoint's origin beside
+the service's. The token is kept in the client until a minute before it
+expires and concurrent requests share one exchange. It is derived from the
+stored credential and never stored, so a refresh needs no lease and nothing
+is persisted. A failed exchange is returned and not kept. A provider
+validates with `provider.NewTokenClient`, which applies the same rule to its
+own calls, and its `Authenticate` returns `provider.ErrTokenSourceOnly`.
+
 `Material` is the unsealed credential handed to an adapter inside the
 broker: a kind, its fields as `Secret` values, and an expiry. It is encoded
 for sealing by the `provider` package, versioned, with field values as bytes
