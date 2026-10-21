@@ -9,6 +9,57 @@
   ],
   "releases": [
     {
+      "version": "v0.5.0",
+      "date": "2026-10-21",
+      "highlights": [
+        {
+          "description": "Token sources: a provider can have a stored key, such as a service account key, exchanged for short-lived access tokens that the broker mints, keeps and replaces"
+        },
+        {
+          "description": "Nothing new is stored: a token is derived from the credential, so a refresh needs no lease"
+        },
+        {
+          "description": "No breaking changes"
+        }
+      ],
+      "added": [
+        {
+          "description": "`provider.TokenSource` and `provider.AccessToken`: an optional provider capability that exchanges the stored credential for an access token through the egress-restricted client",
+          "rmis": [
+            "RMI-CONNECTFORGE-031"
+          ]
+        },
+        {
+          "description": "`Broker.HTTPClient` authenticates with minted tokens for a provider that implements `TokenSource`; a token is kept until `provider.TokenExpiryMargin` before it expires, concurrent requests share one exchange, and a failed exchange is not kept",
+          "rmis": [
+            "RMI-CONNECTFORGE-031"
+          ]
+        },
+        {
+          "description": "`provider.NewTokenTransport` and `provider.NewTokenClient` apply the same rule outside the broker, for a provider's `Validate`",
+          "rmis": [
+            "RMI-CONNECTFORGE-031"
+          ]
+        },
+        {
+          "description": "`provider.ErrTokenSourceOnly`, returned by `Authenticate` for a credential used through a token source",
+          "rmis": [
+            "RMI-CONNECTFORGE-031"
+          ]
+        }
+      ],
+      "documentation": [
+        {
+          "description": "The TRD, providers, using, security and index guides and the README describe token sources and their limits"
+        }
+      ],
+      "tests": [
+        {
+          "description": "Token reuse, expiry margin, tokens without an expiry, failed and empty exchanges, concurrent requests sharing one exchange, and create, validate and use through the broker with a token source"
+        }
+      ]
+    },
+    {
       "version": "v0.4.0",
       "date": "2026-10-20",
       "highlights": [
