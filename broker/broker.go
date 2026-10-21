@@ -85,8 +85,14 @@ func (b *Broker) HTTPClient(ctx context.Context, owner cf.OwnerID, p cf.Principa
 	if b.o.OnUse != nil {
 		b.o.OnUse(ctx, c, use)
 	}
+	next := http.RoundTripper(authTransport{prov: prov, m: m, next: base.Transport})
+	if ts, ok := prov.(provider.TokenSource); ok {
+		// The exchange goes through the restricted client, so it may reach
+		// only the manifest's hosts. The token lives as long as this client.
+		next = provider.NewTokenTransport(ts, m, base, base.Transport, b.o.Clock)
+	}
 	return &http.Client{
-		Transport:     authTransport{prov: prov, m: m, next: base.Transport},
+		Transport:     next,
 		CheckRedirect: base.CheckRedirect,
 		Timeout:       base.Timeout,
 	}, nil
