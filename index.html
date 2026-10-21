@@ -884,6 +884,34 @@
   
   
     <li class="md-nav__item">
+      <a href="releases/v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="releases/v0.4.0/" class="md-nav__link">
         
   
@@ -1082,8 +1110,9 @@ broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.</p>
 <div class="admonition warning">
 <p class="admonition-title">Pre-release</p>
-<p>connectforge has not been externally audited. Version 0.1.0 supports
-static API-token connections. Read <a href="guides/security/">Security</a> first.</p>
+<p>connectforge has not been externally audited. It supports static API-token
+connections and credentials exchanged for short-lived access tokens, such
+as service account keys. Read <a href="guides/security/">Security</a> first.</p>
 </div>
 <h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
 <table>
@@ -1105,6 +1134,10 @@ static API-token connections. Read <a href="guides/security/">Security</a> first
 <tr>
 <td><strong>Secrets stay out of sight</strong></td>
 <td><code>Secret</code> redacts itself everywhere it can be printed, errors carry a status and a request ID but never a body, and only the broker and providers can read a value.</td>
+</tr>
+<tr>
+<td><strong>Token sources</strong></td>
+<td>A provider can exchange a stored key for short-lived access tokens. The broker mints them through the restricted client, keeps them until shortly before they expire and never stores them.</td>
 </tr>
 <tr>
 <td><strong>Tested connections</strong></td>

@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.4.0/" class="md-nav__link">
         
   
@@ -1151,6 +1179,11 @@ acting for someone sets <code>OnBehalfOf</code>, which is recorded with any refu
 <li><strong>Reaches only the provider's hosts.</strong> A request for any other host fails
   with <code>egress.ErrRefused</code>, as does a redirect to another host, plain HTTP,
   and a name that resolves to a private, loopback or link-local address.</li>
+<li><strong>Mints its own tokens.</strong> For a provider whose credential is exchanged for
+  short-lived access tokens, the client mints the first when the first
+  request is made, keeps it until a minute before it expires, and then mints
+  another, so a client that lives a while keeps working. The exchange reaches
+  only the provider's hosts, and the token is never stored.</li>
 <li><strong>Holds the credential it was made with.</strong> A disconnect or a replaced
   credential applies to the next client, so make a client per unit of work
   rather than keeping one for the life of the process.</li>

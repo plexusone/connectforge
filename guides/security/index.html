@@ -648,6 +648,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#access-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access tokens
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#known-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -919,6 +930,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.4.0/" class="md-nav__link">
         
   
@@ -1102,6 +1141,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#access-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access tokens
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#known-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1227,10 +1277,19 @@ module is built so that:</p>
 <li>Do not log a request body from a provider call.</li>
 <li>Do not put a credential in a URL, a query string or an error message.</li>
 </ul>
+<h2 id="access-tokens">Access tokens<a class="headerlink" href="#access-tokens" title="Permanent link">&para;</a></h2>
+<p>A provider that implements <code>TokenSource</code> has its stored key exchanged for
+access tokens. The exchange goes through the same egress-restricted client as
+every other request, so the manifest must name the token endpoint's origin and
+a key cannot send the exchange elsewhere. A token is held as a <code>Secret</code> in the
+client that uses it, lives about an hour, and is dropped with the client. It is
+never sealed, logged or audited.</p>
 <h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Static API tokens only.</strong> OAuth with refresh and GitHub App
-  installations are planned. A credential is replaced in place with
+<li><strong>Static keys, and keys exchanged for tokens.</strong> A provider can exchange a
+  stored key for short-lived access tokens, which the broker keeps in memory
+  in the client that uses them and never stores. OAuth with refresh and GitHub
+  App installations are planned. A credential is replaced in place with
   <code>Reconnect</code>.</li>
 <li><strong>Rotation is described, not performed.</strong> A manifest can describe automatic
   rotation, but connectforge does not replace credentials on a schedule; a

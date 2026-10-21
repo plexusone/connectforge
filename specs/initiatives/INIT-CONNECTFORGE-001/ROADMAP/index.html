@@ -16,7 +16,7 @@
         <link rel="prev" href="../PLAN/">
       
       
-        <link rel="next" href="../../../../releases/v0.4.0/">
+        <link rel="next" href="../../../../releases/v0.5.0/">
       
       
         
@@ -908,6 +908,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../releases/v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../releases/v0.4.0/" class="md-nav__link">
         
   
@@ -1168,6 +1196,9 @@ agent-delegated authorization, and a remote service mode.</p>
 <li>Depends on: <code>RMI-CONNECTFORGE-009</code>, <code>RMI-CONNECTFORGE-027</code></li>
 <li>[ ] <code>RMI-CONNECTFORGE-012</code> OAuth authorization code with PKCE: server-side single-use state, allow-listed return destinations, callback handling</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-010</code></li>
+<li>[x] <code>RMI-CONNECTFORGE-031</code> Token sources: a provider exchanges its stored credential (a service account key) for short-lived access tokens, which the broker keeps per client and replaces before they expire</li>
+<li>Depends on: <code>RMI-CONNECTFORGE-009</code></li>
+<li>Note: nothing is persisted, so it needs no lease; GitHub App installation tokens (011) use the same capability</li>
 <li>[ ] <code>RMI-CONNECTFORGE-013</code> Single-flight refresh: lease, compare-and-swap, atomic persistence of a rotated refresh token, failure classification</li>
 <li>Depends on: <code>RMI-CONNECTFORGE-012</code>, <code>RMI-CONNECTFORGE-026</code></li>
 <li>[ ] <code>RMI-CONNECTFORGE-014</code> Concurrency and race tests for refresh and installation-token minting</li>

@@ -550,6 +550,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Writing your own">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exchanging-a-credential-for-a-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exchanging a credential for a token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -908,6 +925,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.4.0/" class="md-nav__link">
         
   
@@ -1076,6 +1121,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Writing your own">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exchanging-a-credential-for-a-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exchanging a credential for a token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1294,6 +1356,21 @@ request, a two-step handshake, or a different verification.</p>
 <a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="c1">// decode resp.Body, return the account</span>
 <a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="p">}</span>
 </code></pre></div>
+<h3 id="exchanging-a-credential-for-a-token">Exchanging a credential for a token<a class="headerlink" href="#exchanging-a-credential-for-a-token" title="Permanent link">&para;</a></h3>
+<p>When the stored credential is not sent on requests but exchanged for a
+short-lived access token, implement <code>provider.TokenSource</code> as well:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">myProvider</span><span class="p">)</span><span class="w"> </span><span class="nx">Token</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">hc</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Client</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="nx">provider</span><span class="p">.</span><span class="nx">Material</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">provider</span><span class="p">.</span><span class="nx">AccessToken</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="c1">// Sign a request with the key in m, post it to the token endpoint with hc,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="c1">// and return the token with its expiry.</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+</code></pre></div>
+<p>The broker mints a token through the restricted client, keeps it until
+<code>provider.TokenExpiryMargin</code> before it expires, and sends it on each request,
+so list the token endpoint's origin in the manifest's base URLs beside the
+service's. Concurrent requests share one exchange, and a failed exchange is
+not kept. A token with no expiry is used once. Nothing is stored. Make
+<code>Authenticate</code> return <code>provider.ErrTokenSourceOnly</code>, and in <code>Validate</code> call the
+service with <code>provider.NewTokenClient(p, m, hc, nil)</code>.</p>
 <p>Rules that keep a provider safe:</p>
 <ul>
 <li><strong>Use the client you are given.</strong> It is already restricted to the
@@ -1312,10 +1389,10 @@ request, a two-step handshake, or a different verification.</p>
   the connection.</li>
 </ul>
 <h2 id="register-it">Register it<a class="headerlink" href="#register-it" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">reg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">provider</span><span class="p">.</span><span class="nx">NewRegistry</span><span class="p">()</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">reg</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="c1">// invalid manifest, or the key is already registered</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">reg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">provider</span><span class="p">.</span><span class="nx">NewRegistry</span><span class="p">()</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">reg</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="c1">// invalid manifest, or the key is already registered</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
 </code></pre></div>
 <p><code>reg.Manifests()</code> returns every manifest ordered by key, which is what a
 connection form lists.</p>
