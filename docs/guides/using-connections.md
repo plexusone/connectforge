@@ -34,6 +34,11 @@ acting for someone sets `OnBehalfOf`, which is recorded with any refusal.
 - **Reaches only the provider's hosts.** A request for any other host fails
   with `egress.ErrRefused`, as does a redirect to another host, plain HTTP,
   and a name that resolves to a private, loopback or link-local address.
+- **Mints its own tokens.** For a provider whose credential is exchanged for
+  short-lived access tokens, the client mints the first when the first
+  request is made, keeps it until a minute before it expires, and then mints
+  another, so a client that lives a while keeps working. The exchange reaches
+  only the provider's hosts, and the token is never stored.
 - **Holds the credential it was made with.** A disconnect or a replaced
   credential applies to the next client, so make a client per unit of work
   rather than keeping one for the life of the process.

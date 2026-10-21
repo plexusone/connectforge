@@ -6,8 +6,9 @@ broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.
 
 !!! warning "Pre-release"
-    connectforge has not been externally audited. Version 0.1.0 supports
-    static API-token connections. Read [Security](guides/security.md) first.
+    connectforge has not been externally audited. It supports static API-token
+    connections and credentials exchanged for short-lived access tokens, such
+    as service account keys. Read [Security](guides/security.md) first.
 
 ## What it does
 
@@ -16,6 +17,7 @@ raw secret.
 | **One model for every connection** | Provider, connection, credential, grant and binding, with a lifecycle that separates what was decided from what was observed. |
 | **Owns the credential lifecycle, not the API clients** | Provider SDKs stay in their own modules and receive an authenticated `*http.Client` through their `WithHTTPClient` option. |
 | **Secrets stay out of sight** | `Secret` redacts itself everywhere it can be printed, errors carry a status and a request ID but never a body, and only the broker and providers can read a value. |
+| **Token sources** | A provider can exchange a stored key for short-lived access tokens. The broker mints them through the restricted client, keeps them until shortly before they expire and never stores them. |
 | **Tested connections** | A credential is validated with its provider before it is stored, and again on demand. A permanent failure moves the connection to `needs_attention`. |
 | **Ports and adapters** | Encryption, authorization, audit, leasing and deployment secrets are interfaces your application supplies. |
 | **Restricted egress** | A provider's requests reach only the hosts its manifest names, over HTTPS, never a private address. |

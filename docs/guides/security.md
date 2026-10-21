@@ -56,10 +56,21 @@ module is built so that:
 - Do not log a request body from a provider call.
 - Do not put a credential in a URL, a query string or an error message.
 
+## Access tokens
+
+A provider that implements `TokenSource` has its stored key exchanged for
+access tokens. The exchange goes through the same egress-restricted client as
+every other request, so the manifest must name the token endpoint's origin and
+a key cannot send the exchange elsewhere. A token is held as a `Secret` in the
+client that uses it, lives about an hour, and is dropped with the client. It is
+never sealed, logged or audited.
+
 ## Known limitations
 
-- **Static API tokens only.** OAuth with refresh and GitHub App
-  installations are planned. A credential is replaced in place with
+- **Static keys, and keys exchanged for tokens.** A provider can exchange a
+  stored key for short-lived access tokens, which the broker keeps in memory
+  in the client that uses them and never stores. OAuth with refresh and GitHub
+  App installations are planned. A credential is replaced in place with
   `Reconnect`.
 - **Rotation is described, not performed.** A manifest can describe automatic
   rotation, but connectforge does not replace credentials on a schedule; a

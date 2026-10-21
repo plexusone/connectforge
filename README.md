@@ -30,9 +30,10 @@ definitions, connections, encrypted credentials, grants and bindings, and a
 broker that hands out authenticated HTTP clients so callers never handle a
 raw secret.
 
-> **Status:** in development. Static-token connections work end to end:
-> the model, the in-memory and SQL stores, the egress policy, the broker and
-> the service. GitHub App and OAuth follow. See the
+> **Status:** in development. Static-token connections and credentials
+> exchanged for short-lived access tokens, such as service account keys, work
+> end to end: the model, the in-memory and SQL stores, the egress policy, the
+> broker and the service. GitHub App and OAuth follow. See the
 > [specifications](docs/specs/initiatives/INIT-CONNECTFORGE-001/PRD.md).
 
 ## What it does
@@ -44,6 +45,9 @@ raw secret.
   their own modules and receive an authenticated `http.Client`.
 - **Safe refresh and rotation:** single-flight refresh that persists a rotated
   refresh token atomically.
+- **Token sources:** a provider can exchange a stored key for short-lived access
+  tokens, which the broker mints through the restricted client, keeps until
+  shortly before they expire and never stores.
 - **Tested connections:** validation with account discovery on create, on
   demand and on a schedule.
 - **Ports and adapters:** storage, encryption, authorization, audit and egress
