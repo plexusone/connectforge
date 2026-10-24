@@ -40,7 +40,10 @@ type Policy struct {
 	// AllowHTTP permits plain HTTP. It is for development and tests only.
 	AllowHTTP bool
 	// Transport is the base transport, cloned. The default is a clone of
-	// http.DefaultTransport.
+	// http.DefaultTransport. Its proxy and its dial functions (DialContext,
+	// DialTLSContext, Dial and DialTLS) are replaced, so every connection is
+	// made by the policy's dialer and checked; configure TLS, including
+	// client certificates, through TLSClientConfig.
 	Transport *http.Transport
 	// Timeout bounds a whole request. Default 30 seconds.
 	Timeout time.Duration
@@ -56,6 +59,11 @@ func Client(p Policy) *http.Client {
 	tr.Proxy = nil // a proxy would hide the destination from the dial check
 	dialer := &net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second, Control: p.control}
 	tr.DialContext = dialer.DialContext
+	// A custom TLS or legacy dialer would be used instead of DialContext and
+	// skip the address check, so TLS is done over the checked connection.
+	tr.DialTLSContext = nil
+	tr.DialTLS = nil //nolint:staticcheck // SA1019: cleared because a caller's transport may still set it
+	tr.Dial = nil    //nolint:staticcheck // SA1019: as above
 	timeout := p.Timeout
 	if timeout == 0 {
 		timeout = 30 * time.Second

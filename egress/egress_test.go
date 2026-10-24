@@ -1,7 +1,10 @@
 package egress_test
 
 import (
+	"context"
+	"crypto/tls"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
@@ -67,5 +70,27 @@ func TestPolicy(t *testing.T) {
 	}
 	if err := get(egress.Client(egress.Policy{Hosts: []string{ph}, AllowPrefixes: loopback, AllowHTTP: true}), plain.URL); err != nil {
 		t.Fatalf("plain HTTP when allowed: %v", err)
+	}
+}
+
+// TestCustomDialersAreReplaced proves a base transport's own dialers cannot
+// skip the address check: the fake API listens on a loopback address.
+func TestCustomDialersAreReplaced(t *testing.T) {
+	api := fakeapi.Start(t)
+	tlsConf := api.Client().Transport.(*http.Transport).TLSClientConfig //nolint:forcetypeassert // httptest's client always uses *http.Transport
+	direct := func(_ context.Context, network, addr string) (net.Conn, error) {
+		return tls.Dial(network, addr, tlsConf)
+	}
+	plain := func(network, addr string) (net.Conn, error) { return net.Dial(network, addr) }
+	h := host(t, api.URL)
+	for name, base := range map[string]*http.Transport{
+		"DialTLSContext": {TLSClientConfig: tlsConf, DialTLSContext: direct},
+		"DialTLS":        {TLSClientConfig: tlsConf, DialTLS: func(network, addr string) (net.Conn, error) { return tls.Dial(network, addr, tlsConf) }},
+		"Dial":           {TLSClientConfig: tlsConf, Dial: plain},
+	} {
+		c := egress.Client(egress.Policy{Hosts: []string{h}, Transport: base})
+		if err := get(c, api.URL+"/data"); !errors.Is(err, egress.ErrRefused) {
+			t.Errorf("%s: a loopback address was reached: %v", name, err)
+		}
 	}
 }
