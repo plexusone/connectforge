@@ -173,3 +173,18 @@ func TestManifestGuidance(t *testing.T) {
 		}
 	}
 }
+
+func TestClassifyBoundsTheRequestID(t *testing.T) {
+	for raw, want := range map[string]string{
+		"req-123":                  "req-123",
+		strings.Repeat("a", 10000): strings.Repeat("a", 128),
+		"id\r\n\x00with spacesé":   "idwithspaces",
+		"\x01\x02":                 "",
+	} {
+		resp := &http.Response{StatusCode: 401, Header: http.Header{"X-Request-Id": {raw}}}
+		var se *provider.StatusError
+		if err := provider.Classify("p", resp); !errors.As(err, &se) || se.RequestID != want {
+			t.Errorf("a request ID header of %d bytes was not bounded to %d bytes: %d", len(raw), len(want), len(err.Error()))
+		}
+	}
+}

@@ -265,6 +265,25 @@ func TestTransientFailureChangesOnlyHealth(t *testing.T) {
 	}
 }
 
+// TestHealthKeepsOnlyTheClass proves a transport failure, whose error names
+// the URL and the resolved address, is recorded in health by its class only.
+func TestHealthKeepsOnlyTheClass(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.api.Close()
+	c, err = e.svc.Test(ctx, owner, admin, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Health.LastValidation != cf.OutcomeFailed || c.Health.LastError != "fakecdn: "+cf.ErrTransient.Error() {
+		t.Fatalf("last error: %q", c.Health.LastError)
+	}
+}
+
 func TestDisconnectDestroysCredentials(t *testing.T) {
 	ctx := context.Background()
 	e := setup(t)

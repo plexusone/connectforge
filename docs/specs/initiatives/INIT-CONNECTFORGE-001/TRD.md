@@ -116,7 +116,7 @@ only by compare-and-swap on its revision.
 type Health struct {
     LastValidatedAt  time.Time
     LastValidation   Outcome   // ok, failed, unknown
-    LastError        string    // classified, never containing a secret
+    LastError        string    // classified; never a secret, a body, a URL or an address
     ConsecutiveFails int
     // CredentialExpiresAt is when the current credential stops working, as
     // the provider reported at the last successful validation.

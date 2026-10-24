@@ -239,7 +239,7 @@ func (s *Service) Test(ctx context.Context, owner cf.OwnerID, actor cf.Principal
 		if verr != nil {
 			c.Health.LastValidatedAt = now
 			c.Health.LastValidation = cf.OutcomeFailed
-			c.Health.LastError = verr.Error()
+			c.Health.LastError = healthMessage(c.Provider, verr)
 			c.Health.ConsecutiveFails++
 			if cf.Permanent(verr) {
 				c.State = cf.StateNeedsAttention
@@ -276,6 +276,23 @@ func (s *Service) Disconnect(ctx context.Context, owner cf.OwnerID, actor cf.Pri
 		return c, fmt.Errorf("service: connection is disconnected but its credentials were not destroyed: %w", err)
 	}
 	return c, s.audited(ctx, event(c, actor, cf.EventConnectionDisconnected, s.o.Clock.Now(), nil), nil)
+}
+
+// healthMessage is the failure recorded in a connection's health, which the
+// people who may view the connection see. It keeps a provider's classified
+// refusal (status and bounded request ID) but replaces any other error, such
+// as a transport or egress failure that names a URL or a resolved address,
+// with its class. The full error is in the audit event.
+func healthMessage(providerKey string, err error) string {
+	if se, ok := errors.AsType[*provider.StatusError](err); ok {
+		return se.Error()
+	}
+	for _, class := range []error{cf.ErrInvalidCredential, cf.ErrInsufficientScope, cf.ErrRateLimited, cf.ErrTransient, cf.ErrCredentialUnavailable} {
+		if errors.Is(err, class) {
+			return providerKey + ": " + class.Error()
+		}
+	}
+	return providerKey + ": validation failed"
 }
 
 // ReconnectInput is a replacement credential for an existing connection.

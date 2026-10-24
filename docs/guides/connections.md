@@ -46,7 +46,7 @@ Every store enforces the transition table; a change it forbids returns
 |---|---|
 | `LastValidatedAt` | When the provider was last asked |
 | `LastValidation` | `ok`, `failed` or `unknown` |
-| `LastError` | A classified message with the status and the provider's request ID. Never a response body |
+| `LastError` | A classified message: the provider's refusal with its status and request ID (at most 128 printable characters), or only the failure's class, such as `connectforge: transient failure`, for a network or egress failure. Never a response body, a URL or a resolved address; the full error is in the audit event |
 | `ConsecutiveFails` | Failed checks in a row; reset by a success |
 | `CredentialExpiresAt` | When the current credential stops working, as the provider reported at the last successful check; empty when it does not expire or the provider does not say |
 

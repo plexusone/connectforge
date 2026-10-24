@@ -69,10 +69,13 @@ const (
 // Health is what was last observed about a connection, kept apart from its
 // lifecycle [State].
 type Health struct {
-	LastValidatedAt  time.Time `json:"lastValidatedAt,omitzero"`
-	LastValidation   Outcome   `json:"lastValidation,omitempty"`
-	LastError        string    `json:"lastError,omitempty"`
-	ConsecutiveFails int       `json:"consecutiveFails,omitempty"`
+	LastValidatedAt time.Time `json:"lastValidatedAt,omitzero"`
+	LastValidation  Outcome   `json:"lastValidation,omitempty"`
+	// LastError is the last failure, classified: a provider's refusal with
+	// its status and bounded request ID, or only the class of any other
+	// failure. It never holds a secret, a body, a URL or a resolved address.
+	LastError        string `json:"lastError,omitempty"`
+	ConsecutiveFails int    `json:"consecutiveFails,omitempty"`
 	// CredentialExpiresAt is when the current credential stops working, as
 	// the provider reported at the last successful validation; nil when it
 	// does not expire or the provider does not say.
