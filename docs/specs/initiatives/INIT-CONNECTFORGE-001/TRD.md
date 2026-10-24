@@ -475,8 +475,12 @@ type Broker interface {
   client. Refresh (phase 3) happens when a client is made, under the lease.
 - The client is wrapped by `egress`: a request whose host is not in the
   provider's manifest `baseUrls` is refused, redirects to another host are
-  refused, and resolved private, loopback and link-local addresses are
-  refused unless the host explicitly allows a development destination.
+  refused, and a resolved address that is not public is refused: private,
+  loopback, link-local, shared, reserved and documentation ranges, and IPv6
+  transition forms that embed an IPv4 address (a NAT64 address is judged by
+  the IPv4 address it embeds; 6to4, Teredo and IPv4-compatible addresses are
+  refused outright), unless the host explicitly allows a development
+  destination.
 - The result is an `*http.Client` a provider SDK can accept
   (`WithHTTPClient`), which is how SDKs consume a connection without
   connectforge importing them.

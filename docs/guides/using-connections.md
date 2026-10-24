@@ -33,7 +33,9 @@ acting for someone sets `OnBehalfOf`, which is recorded with any refusal.
   not modified.
 - **Reaches only the provider's hosts.** A request for any other host fails
   with `egress.ErrRefused`, as does a redirect to another host, plain HTTP,
-  and a name that resolves to a private, loopback or link-local address.
+  and a name that resolves to an address that is not public: private,
+  loopback, link-local, shared, reserved or documentation ranges, or an IPv6
+  form (NAT64, 6to4, Teredo, IPv4-compatible) that embeds one.
 - **Mints its own tokens.** For a provider whose credential is exchanged for
   short-lived access tokens, the client mints the first when the first
   request is made, keeps it until a minute before it expires, and then mints

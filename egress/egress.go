@@ -1,7 +1,9 @@
 // Package egress restricts where a provider request may go: only to the hosts
 // a provider's manifest names, over HTTPS, without following a redirect to
-// another host, and never to a private, loopback or link-local address, which
-// is checked after DNS resolution so a rebinding name cannot reach one.
+// another host, and never to an address that is not public: private,
+// loopback, link-local, shared, reserved and documentation ranges, and IPv6
+// forms that embed such an IPv4 address. The address is checked after DNS
+// resolution, so a rebinding name cannot reach one.
 package egress
 
 import (
@@ -94,11 +96,59 @@ func (p Policy) control(_, address string, _ syscall.RawConn) error {
 	return nil
 }
 
+// blocked reports whether a is not a public unicast address. Besides the
+// loopback, private, link-local, multicast and unspecified addresses, it
+// refuses the IANA special-purpose ranges that are not globally reachable,
+// and the IPv6 forms that carry an IPv4 address a gateway may translate: a
+// NAT64 address is judged by the IPv4 address it embeds, and the other
+// transition forms are refused outright.
 func blocked(a netip.Addr) bool {
 	a = a.Unmap()
-	return a.IsLoopback() || a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsLinkLocalMulticast() ||
-		a.IsInterfaceLocalMulticast() || a.IsMulticast() || a.IsUnspecified() || cgnat.Contains(a)
+	if !a.IsGlobalUnicast() || a.IsPrivate() {
+		return true
+	}
+	if v4, ok := nat64(a); ok {
+		return blocked(v4)
+	}
+	for _, p := range special {
+		if p.Contains(a) {
+			return true
+		}
+	}
+	return false
 }
 
-// cgnat is shared address space (RFC 6598), not public.
-var cgnat = netip.MustParsePrefix("100.64.0.0/10")
+// nat64 returns the IPv4 address embedded in a well-known-prefix NAT64
+// address (RFC 6052).
+func nat64(a netip.Addr) (netip.Addr, bool) {
+	if !wellKnownNAT64.Contains(a) {
+		return netip.Addr{}, false
+	}
+	b := a.As16()
+	return netip.AddrFrom4([4]byte(b[12:])), true
+}
+
+var wellKnownNAT64 = netip.MustParsePrefix("64:ff9b::/96")
+
+// special are special-purpose ranges (RFC 6890 and the IANA registries) that
+// are not public destinations, beyond those the netip predicates cover.
+var special = []netip.Prefix{
+	netip.MustParsePrefix("0.0.0.0/8"),       // "this network"
+	netip.MustParsePrefix("100.64.0.0/10"),   // shared address space (RFC 6598)
+	netip.MustParsePrefix("192.0.0.0/24"),    // IETF protocol assignments
+	netip.MustParsePrefix("192.0.2.0/24"),    // documentation
+	netip.MustParsePrefix("192.88.99.0/24"),  // 6to4 relay anycast
+	netip.MustParsePrefix("198.18.0.0/15"),   // benchmarking
+	netip.MustParsePrefix("198.51.100.0/24"), // documentation
+	netip.MustParsePrefix("203.0.113.0/24"),  // documentation
+	netip.MustParsePrefix("240.0.0.0/4"),     // reserved, and the broadcast address
+	netip.MustParsePrefix("::/96"),           // IPv4-compatible (deprecated)
+	netip.MustParsePrefix("64:ff9b:1::/48"),  // local-use NAT64
+	netip.MustParsePrefix("100::/64"),        // discard-only
+	netip.MustParsePrefix("2001::/23"),       // IETF protocol assignments, including Teredo
+	netip.MustParsePrefix("2001:db8::/32"),   // documentation
+	netip.MustParsePrefix("2002::/16"),       // 6to4
+	netip.MustParsePrefix("3fff::/20"),       // documentation
+	netip.MustParsePrefix("5f00::/16"),       // segment routing
+	netip.MustParsePrefix("fec0::/10"),       // site-local (deprecated)
+}
