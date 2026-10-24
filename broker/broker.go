@@ -9,6 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
+	"sync"
 
 	cf "github.com/plexusone/connectforge"
 	"github.com/plexusone/connectforge/egress"
@@ -31,9 +34,14 @@ type Options struct {
 	Clock cf.Clock
 }
 
-// Broker hands out authenticated clients.
+// Broker hands out authenticated clients. It is safe for concurrent use.
 type Broker struct {
 	o Options
+
+	mu sync.Mutex
+	// clients are the restricted clients by host set, so each provider's
+	// requests share one transport and its connection pool.
+	clients map[string]*http.Client
 }
 
 // New returns a broker.
@@ -51,7 +59,7 @@ func New(o Options) (*Broker, error) {
 	if o.Clock == nil {
 		o.Clock = cf.SystemClock{}
 	}
-	return &Broker{o: o}, nil
+	return &Broker{o: o, clients: map[string]*http.Client{}}, nil
 }
 
 // HTTPClient returns a client whose requests carry the connection's
@@ -99,15 +107,25 @@ func (b *Broker) HTTPClient(ctx context.Context, owner cf.OwnerID, p cf.Principa
 }
 
 // ProviderClient returns an unauthenticated client restricted to the
-// manifest's hosts, for validation.
+// manifest's hosts, for validation. Clients for the same hosts share one
+// transport, so their connections are pooled rather than left open per call.
 func (b *Broker) ProviderClient(m provider.Manifest) (*http.Client, error) {
 	hosts, err := m.Hosts()
 	if err != nil {
 		return nil, err
 	}
-	pol := b.o.Egress
-	pol.Hosts = hosts
-	return egress.Client(pol), nil
+	key := strings.Join(slices.Sorted(slices.Values(hosts)), "\n")
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	c, ok := b.clients[key]
+	if !ok {
+		pol := b.o.Egress
+		pol.Hosts = hosts
+		c = egress.Client(pol)
+		b.clients[key] = c
+	}
+	cp := *c // the caller may change its copy; the transport is shared
+	return &cp, nil
 }
 
 // Seal encrypts material as version v of c's credential.
