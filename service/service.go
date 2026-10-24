@@ -114,6 +114,9 @@ func (s *Service) Create(ctx context.Context, in CreateInput) (cf.Connection, er
 		return cf.Connection{}, err
 	}
 	res, err := prov.Validate(ctx, hc, m)
+	if err == nil && res.AccountID == "" && !method.AccountUnverifiable {
+		err = fmt.Errorf("%w: %s returned no account ID", cf.ErrAccountUnknown, in.Provider)
+	}
 	if err != nil {
 		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventConnectionCreated, now, err), err)
 	}
@@ -286,8 +289,11 @@ type ReconnectInput struct {
 
 // Reconnect replaces a connection's credential with a new one, keeping the
 // connection, so what is bound to it keeps working. The new credential is
-// validated with the provider first; if it is rejected, or belongs to a
-// different account, nothing changes. On success the previous versions stay
+// validated with the provider first; if it is rejected, belongs to a
+// different account ([cf.ErrAccountMismatch]), or cannot be shown to belong
+// to the same account ([cf.ErrAccountUnknown]), nothing changes. An auth
+// method marked AccountUnverifiable skips the proof when either account ID
+// is missing, and the audit event records that it did. On success the previous versions stay
 // until the connection's credentials are destroyed, the connection is
 // `connected` again with fresh health, and a connection that needed
 // attention, or was disconnected, is usable.
@@ -328,8 +334,9 @@ func (s *Service) Reconnect(ctx context.Context, in ReconnectInput) (cf.Connecti
 	if verr != nil {
 		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventCredentialReplaced, now, verr), verr)
 	}
-	if c.ExternalAccountID != "" && res.AccountID != "" && c.ExternalAccountID != res.AccountID {
-		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventCredentialReplaced, now, cf.ErrAccountMismatch), cf.ErrAccountMismatch)
+	verified, err := sameAccount(method, c.ExternalAccountID, res.AccountID)
+	if err != nil {
+		return cf.Connection{}, s.audited(ctx, event(c, in.Actor, cf.EventCredentialReplaced, now, err), err)
 	}
 
 	active := 0
@@ -364,7 +371,31 @@ func (s *Service) Reconnect(ctx context.Context, in ReconnectInput) (cf.Connecti
 	if err != nil {
 		return cf.Connection{}, fmt.Errorf("service: the credential was replaced but the connection was not updated: %w", err)
 	}
-	return out, s.audited(ctx, event(out, in.Actor, cf.EventCredentialReplaced, now, nil), nil)
+	e := event(out, in.Actor, cf.EventCredentialReplaced, now, nil)
+	if !verified {
+		e.Details = map[string]string{"account": "unverified"}
+	}
+	return out, s.audited(ctx, e, nil)
+}
+
+// sameAccount checks that a replacement credential's account, got, is the
+// connection's, stored. It fails closed: a missing account ID on either side
+// is refused unless the method declares that accounts cannot be identified.
+// verified reports whether the accounts were compared.
+func sameAccount(m provider.AuthMethod, stored, got string) (verified bool, err error) {
+	switch {
+	case stored != "" && got != "":
+		if stored != got {
+			return false, cf.ErrAccountMismatch
+		}
+		return true, nil
+	case m.AccountUnverifiable:
+		return false, nil
+	case got == "":
+		return false, fmt.Errorf("%w: the provider returned no account ID", cf.ErrAccountUnknown)
+	default:
+		return false, fmt.Errorf("%w: the connection has no recorded account; connect it again as a new connection", cf.ErrAccountUnknown)
+	}
 }
 
 // Bindings lists what depends on a connection, so a person can see what a

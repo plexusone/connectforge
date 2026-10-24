@@ -23,7 +23,7 @@ and an agent can read what a connection needs. It contains no code.
 | `Key` | Identifies the provider, for example `cloudflare` |
 | `DisplayName` | Shown to people |
 | `BaseURLs` | The **only** origins a request for this provider may reach |
-| `AuthMethods` | One or more ways to connect: `Key`, `Fields`, `Scopes`, `AccountSelection`, `HelpURL`, and the guidance `Setup` and `Rotation` |
+| `AuthMethods` | One or more ways to connect: `Key`, `Fields`, `Scopes`, `AccountSelection`, `AccountUnverifiable`, `HelpURL`, and the guidance `Setup` and `Rotation` |
 | `HelpURL` | Where a person learns to create the credential |
 
 A **field** is an input: `Name`, `Label`, `Secret`, `Required` and `Help`. A
@@ -105,7 +105,8 @@ A `Request` has a `Path` and dot-separated paths into the JSON response, where
 a number indexes an array: `AccountIDPath`, `AccountLabelPath`, `ScopesPath`
 for an array of strings, and `ExpiresAtPath` for the token's expiry as an
 RFC 3339 timestamp. A missing or unparseable expiry leaves it unknown rather
-than failing validation.
+than failing validation. `New` requires an `AccountIDPath` in `Verify` or
+`Account` unless the auth method is `AccountUnverifiable`.
 
 When a provider reports an expiry, the service records it on the credential
 and in the connection's `Health.CredentialExpiresAt`, so an interface can say
@@ -170,9 +171,14 @@ Rules that keep a provider safe:
 - **Call `Reveal` only here.** `Secret.Reveal` is for provider adapters and
   the broker. A test fails if it is called anywhere else in the module; clear
   the copy you take.
-- **Do not make the account discovery depend on a human.** If the credential
-  names no account, leave `AccountID` empty and let the display name identify
-  the connection.
+- **Return the account ID.** The service refuses a credential whose
+  validation returns no `AccountID` (`ErrAccountUnknown`), because without it
+  a reconnect cannot prove the replacement credential is for the same
+  account. If the service genuinely cannot name the account, set
+  `AccountUnverifiable` on the auth method: the connection is then stored
+  without an account ID, and a reconnect replaces its credential without the
+  proof and records `account: unverified` on the audit event. Do not make the
+  account discovery depend on a human.
 
 ## Register it
 

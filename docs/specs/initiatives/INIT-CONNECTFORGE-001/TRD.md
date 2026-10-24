@@ -385,6 +385,15 @@ Property names are camelCase (a document format owned here). A manifest
 never contains executable content. Secret fields are never echoed back by
 any API.
 
+Validation must return the account ID, so `Reconnect` can prove a
+replacement credential is for the connection's account: `Create` refuses a
+credential with no account ID, and `Reconnect` refuses one whose account
+differs (`ErrAccountMismatch`) or cannot be compared because either side has
+none (`ErrAccountUnknown`). An auth method whose provider cannot name the
+account sets `"accountUnverifiable": true`; its connections may have no
+account ID, and a reconnect that cannot compare accounts proceeds and
+records `account: unverified` in its audit event.
+
 An auth method may also guide a person through creating the credential:
 
 ```json

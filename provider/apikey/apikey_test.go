@@ -67,7 +67,7 @@ func TestAuthenticate(t *testing.T) {
 		t.Fatalf("missing token: %v", err)
 	}
 
-	custom, err := apikey.New(apikey.Config{Manifest: api.Manifest(), Header: "X-Api-Key", Verify: apikey.Request{Path: "/verify"}})
+	custom, err := apikey.New(apikey.Config{Manifest: api.Manifest(), Header: "X-Api-Key", Verify: apikey.Request{Path: "/verify", AccountIDPath: "result.id"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,10 +84,20 @@ func TestNewChecksConfig(t *testing.T) {
 		"method":   {Manifest: m, Method: "oauth2", Verify: apikey.Request{Path: "/verify"}},
 		"field":    {Manifest: m, Field: "key", Verify: apikey.Request{Path: "/verify"}},
 		"manifest": {Manifest: provider.Manifest{Key: "x"}, Verify: apikey.Request{Path: "/verify"}},
+		"account":  {Manifest: m, Verify: apikey.Request{Path: "/verify"}},
+		"account in neither request": {
+			Manifest: m, Verify: apikey.Request{Path: "/verify"}, Account: &apikey.Request{Path: "/accounts"},
+		},
 	} {
 		if _, err := apikey.New(cfg); err == nil {
 			t.Errorf("%s: bad config accepted", name)
 		}
+	}
+
+	// A method that declares accounts unverifiable needs no account path.
+	m.AuthMethods[0].AccountUnverifiable = true
+	if _, err := apikey.New(apikey.Config{Manifest: m, Verify: apikey.Request{Path: "/verify"}}); err != nil {
+		t.Errorf("unverifiable method: %v", err)
 	}
 }
 

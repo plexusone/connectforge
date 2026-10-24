@@ -102,6 +102,11 @@ The new credential is validated with the provider **before** anything is
 stored, so a rejected one changes nothing. It must belong to the same account
 as the connection (`ErrAccountMismatch` otherwise): connecting another account
 is a new connection, so a feature never silently reads someone else's data.
+The check fails closed: when the provider returns no account ID, or the
+connection has none recorded, the reconnect is refused with
+`ErrAccountUnknown`, unless the auth method is `AccountUnverifiable`, in which
+case the credential is replaced and the audit event records
+`account: unverified`.
 On success the connection is `connected` again with fresh health, and its
 credential has a new version.
 
@@ -139,6 +144,7 @@ A connection that is `disconnected` or `revoked` cannot be tested and returns
 | `ErrDenied` | The `Authorizer` refused |
 | `ErrNotUsable` | The connection's state does not allow it |
 | `ErrAccountMismatch` | A reconnect's credential belongs to a different account |
+| `ErrAccountUnknown` | The provider did not identify the credential's account, or the connection has no recorded account, so the account cannot be checked |
 | `ErrConflict` | Another writer changed it first; retry |
 | `ErrInvalidTransition` | The lifecycle forbids the change |
 | `ErrCredentialUnavailable` | The credential could not be read or decrypted. The connection is not used; there is no fallback |
