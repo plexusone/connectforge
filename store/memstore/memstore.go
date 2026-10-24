@@ -162,6 +162,12 @@ func (s *Store) SwapCredential(ctx context.Context, expectActive int, next cf.Cr
 	}
 	set.versions[next.Version] = next.Clone()
 	set.active = next.Version
+	for v, old := range set.versions {
+		if v < next.Version {
+			clear(old.Ciphertext)
+			delete(set.versions, v)
+		}
+	}
 	return nil
 }
 

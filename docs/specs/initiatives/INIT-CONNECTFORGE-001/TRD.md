@@ -148,9 +148,11 @@ type Credential struct {
 The plaintext structure for each `Kind` is private to its provider and
 sealed as a whole. The ciphertext is a self-describing envelope, so it
 records which key version sealed it and needs no separate key reference.
-Credentials are append-only by version, and the credential store tracks the
-active version. Older versions are kept until the connection's credentials
-are destroyed, so a replacement can be validated before it is activated.
+Credentials are versioned, and the credential store tracks the active
+version. A replacement is validated before it is sealed and activated, and
+activating it removes the older versions in the same operation, so a
+superseded credential is not left sealed in storage where a later
+compromise of the key could expose it.
 
 ### Grants and bindings
 
@@ -191,7 +193,8 @@ type ConnectionStore interface {
 
 type CredentialStore interface {
     // SwapCredential installs next as active iff the active version is
-    // expectActive (0 for none) and next.Version == expectActive+1.
+    // expectActive (0 for none) and next.Version == expectActive+1, and
+    // removes the older versions.
     SwapCredential(ctx context.Context, expectActive int, next Credential) error
     ActiveCredential(ctx context.Context, owner OwnerID, connID string) (Credential, error)
     DestroyCredentials(ctx context.Context, owner OwnerID, connID string) error

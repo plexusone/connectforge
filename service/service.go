@@ -310,10 +310,10 @@ type ReconnectInput struct {
 // different account ([cf.ErrAccountMismatch]), or cannot be shown to belong
 // to the same account ([cf.ErrAccountUnknown]), nothing changes. An auth
 // method marked AccountUnverifiable skips the proof when either account ID
-// is missing, and the audit event records that it did. On success the previous versions stay
-// until the connection's credentials are destroyed, the connection is
-// `connected` again with fresh health, and a connection that needed
-// attention, or was disconnected, is usable.
+// is missing, and the audit event records that it did. On success the
+// previous credential versions are removed, the connection is `connected`
+// again with fresh health, and a connection that needed attention, or was
+// disconnected, is usable.
 //
 // It also recovers a connection whose sealed credential can no longer be
 // read, since the new one is sealed without opening the old.
