@@ -68,3 +68,43 @@ func TestBlocked(t *testing.T) {
 		}
 	}
 }
+
+func TestControl(t *testing.T) {
+	loopback := []netip.Prefix{netip.MustParsePrefix("127.0.0.0/8")}
+	tenNet := []netip.Prefix{netip.MustParsePrefix("10.0.0.0/8")}
+	everything := []netip.Prefix{netip.MustParsePrefix("0.0.0.0/0"), netip.MustParsePrefix("::/0")}
+	cases := []struct {
+		name    string
+		p       Policy
+		address string
+		ok      bool
+	}{
+		{"public", Policy{}, "8.8.8.8:443", true},
+		{"private by default", Policy{}, "10.1.2.3:443", false},
+		{"loopback by default", Policy{}, "127.0.0.1:443", false},
+		{"listed loopback", Policy{AllowPrefixes: loopback}, "127.0.0.1:443", true},
+		{"listed private range", Policy{AllowPrefixes: tenNet}, "10.1.2.3:443", true},
+		{"unlisted private range", Policy{AllowPrefixes: tenNet}, "192.168.1.1:443", false},
+		{"allow private, loopback", Policy{AllowPrivate: true}, "127.0.0.1:443", true},
+		{"allow private, private", Policy{AllowPrivate: true}, "[fd12::1]:443", true},
+
+		// Link-local and metadata addresses are refused whatever the policy.
+		{"allow private, metadata", Policy{AllowPrivate: true}, "169.254.169.254:80", false},
+		{"allow private, link-local", Policy{AllowPrivate: true}, "169.254.1.1:80", false},
+		{"allow private, IPv6 link-local", Policy{AllowPrivate: true}, "[fe80::1]:80", false},
+		{"allow private, IPv6 metadata", Policy{AllowPrivate: true}, "[fd00:ec2::254]:80", false},
+		{"allow private, shared-space metadata", Policy{AllowPrivate: true}, "100.100.100.200:80", false},
+		{"allow private, NAT64 metadata", Policy{AllowPrivate: true}, "[64:ff9b::a9fe:a9fe]:80", false},
+		{"allow private, IPv4-compatible metadata", Policy{AllowPrivate: true}, "[::a9fe:a9fe]:80", false},
+		{"allow private, 6to4 metadata", Policy{AllowPrivate: true}, "[2002:a9fe:a9fe::1]:80", false},
+		{"allow private, mapped metadata", Policy{AllowPrivate: true}, "[::ffff:169.254.169.254]:80", false},
+		{"listed metadata", Policy{AllowPrefixes: everything}, "169.254.169.254:80", false},
+		{"listed IPv6 metadata", Policy{AllowPrefixes: everything}, "[fd00:ec2::254]:80", false},
+	}
+	for _, tc := range cases {
+		err := tc.p.control("tcp", tc.address, nil)
+		if (err == nil) != tc.ok {
+			t.Errorf("%s: control(%s) = %v, want ok=%v", tc.name, tc.address, err, tc.ok)
+		}
+	}
+}

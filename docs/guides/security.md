@@ -40,8 +40,13 @@ module is built so that:
 - **Use a stable, non-reusable owner.** An organization ID, not a slug or a
   name that can be released and given to someone else.
 - **Fail closed in the transaction hook** when there is no tenant.
-- **Keep the egress policy strict in production.** `AllowPrivate` and
-  `AllowHTTP` exist for tests against local fakes; leave them off.
+- **Keep the egress policy strict in production.** `AllowPrefixes`,
+  `AllowPrivate` and `AllowHTTP` exist for tests against local fakes; leave
+  them off. When a development or staging setup needs a non-public
+  destination, list only its range in `AllowPrefixes` (for example
+  `127.0.0.0/8`) rather than setting the deprecated `AllowPrivate`.
+  Link-local and cloud metadata addresses (`169.254.0.0/16`, `fe80::/10`,
+  `fd00:ec2::254`, `100.100.100.200`) are refused whatever the policy says.
 - **Back up your key material** with the database. Without the key, stored
   credentials cannot be read.
 - **Ask providers for the narrowest read permissions** their features need,

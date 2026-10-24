@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/netip"
 	"slices"
 	"strings"
 	"sync"
@@ -71,6 +72,9 @@ func (r *recorder) types() []cf.EventType {
 	return out
 }
 
+// loopback lets the tests reach their local fake API.
+var loopback = []netip.Prefix{netip.MustParsePrefix("127.0.0.0/8")}
+
 type env struct {
 	api    *fakeapi.API
 	store  *memstore.Store
@@ -89,7 +93,7 @@ func setup(t *testing.T) *env {
 	e := &env{api: api, store: memstore.New(), audit: &recorder{}}
 	b, err := broker.New(broker.Options{
 		Store: e.store, Crypto: cryptotest.New(), Providers: reg, Authorizer: authz{}, Auditor: e.audit,
-		Egress: egress.Policy{AllowPrivate: true, Transport: api.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
+		Egress: egress.Policy{AllowPrefixes: loopback, Transport: api.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -24,8 +24,18 @@ var ErrRefused = errors.New("egress: refused")
 type Policy struct {
 	// Hosts are the allowed hosts, with a port when not the default.
 	Hosts []string
-	// AllowPrivate permits private, loopback and link-local addresses. It is
-	// for development and tests only.
+	// AllowPrefixes are ranges a request may reach although they are not
+	// public, for a development or test destination: 127.0.0.0/8 for a local
+	// fake, say, or the one private range a staging mock lives in. It is for
+	// development and tests only. Link-local and cloud metadata addresses
+	// are refused even when listed.
+	AllowPrefixes []netip.Prefix
+	// AllowPrivate permits every address that is not public except
+	// link-local and cloud metadata addresses, which are always refused. It
+	// is for development and tests only.
+	//
+	// Deprecated: list only the ranges a development setup needs in
+	// AllowPrefixes.
 	AllowPrivate bool
 	// AllowHTTP permits plain HTTP. It is for development and tests only.
 	AllowHTTP bool
@@ -83,18 +93,75 @@ func (t checkTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 
 // control runs on the resolved address just before connecting.
 func (p Policy) control(_, address string, _ syscall.RawConn) error {
-	if p.AllowPrivate {
-		return nil
-	}
 	ap, err := netip.ParseAddrPort(address)
 	if err != nil {
 		return fmt.Errorf("%w: address %s", ErrRefused, address)
 	}
-	if blocked(ap.Addr()) {
-		return fmt.Errorf("%w: %s is not a public address", ErrRefused, ap.Addr())
+	a := ap.Addr().Unmap()
+	if neverAllowed(a) {
+		return fmt.Errorf("%w: %s is a link-local or metadata address", ErrRefused, a)
+	}
+	if p.AllowPrivate || p.allowed(a) {
+		return nil
+	}
+	if blocked(a) {
+		return fmt.Errorf("%w: %s is not a public address", ErrRefused, a)
 	}
 	return nil
 }
+
+// allowed reports whether a is in one of the policy's AllowPrefixes.
+func (p Policy) allowed(a netip.Addr) bool {
+	return slices.ContainsFunc(p.AllowPrefixes, func(pr netip.Prefix) bool { return pr.Contains(a) })
+}
+
+// neverAllowed reports whether a is a link-local or cloud metadata address,
+// or an IPv6 form that embeds one, which no policy may reach: a provider API
+// never lives there, and reaching one from a server can expose its cloud
+// credentials. Teredo and local-use NAT64 addresses, whose embedded address
+// cannot be checked reliably, are refused too.
+func neverAllowed(a netip.Addr) bool {
+	a = a.Unmap()
+	if v4, ok := embeddedIPv4(a); ok && neverAllowed(v4) {
+		return true
+	}
+	return slices.ContainsFunc(never, func(p netip.Prefix) bool { return p.Contains(a) })
+}
+
+// never are the ranges no policy may reach.
+var never = []netip.Prefix{
+	netip.MustParsePrefix("169.254.0.0/16"),     // link-local, including 169.254.169.254
+	netip.MustParsePrefix("100.100.100.200/32"), // a cloud metadata service in shared address space
+	netip.MustParsePrefix("168.63.129.16/32"),   // a cloud platform's host endpoint
+	netip.MustParsePrefix("fe80::/10"),          // link-local
+	netip.MustParsePrefix("fd00:ec2::254/128"),  // a cloud metadata service over IPv6
+	netip.MustParsePrefix("2001::/32"),          // Teredo
+	netip.MustParsePrefix("64:ff9b:1::/48"),     // local-use NAT64
+}
+
+// embeddedIPv4 returns the IPv4 address carried by a well-known-prefix NAT64,
+// an IPv4-compatible or a 6to4 address.
+func embeddedIPv4(a netip.Addr) (netip.Addr, bool) {
+	if v4, ok := nat64(a); ok {
+		return v4, true
+	}
+	if !a.Is6() {
+		return netip.Addr{}, false
+	}
+	b := a.As16()
+	switch {
+	case ipv4Compatible.Contains(a):
+		return netip.AddrFrom4([4]byte(b[12:])), true
+	case sixToFour.Contains(a):
+		return netip.AddrFrom4([4]byte(b[2:6])), true
+	}
+	return netip.Addr{}, false
+}
+
+var (
+	ipv4Compatible = netip.MustParsePrefix("::/96")
+	sixToFour      = netip.MustParsePrefix("2002::/16")
+)
 
 // blocked reports whether a is not a public unicast address. Besides the
 // loopback, private, link-local, multicast and unspecified addresses, it

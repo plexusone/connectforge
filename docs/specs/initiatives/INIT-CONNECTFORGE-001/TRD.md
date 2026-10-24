@@ -480,7 +480,9 @@ type Broker interface {
   transition forms that embed an IPv4 address (a NAT64 address is judged by
   the IPv4 address it embeds; 6to4, Teredo and IPv4-compatible addresses are
   refused outright), unless the host explicitly allows a development
-  destination.
+  destination by listing its range in `AllowPrefixes`. Link-local and cloud
+  metadata addresses, and IPv6 forms that embed one, are refused whatever
+  the policy allows.
 - The result is an `*http.Client` a provider SDK can accept
   (`WithHTTPClient`), which is how SDKs consume a connection without
   connectforge importing them.
