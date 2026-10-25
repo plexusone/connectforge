@@ -30,8 +30,9 @@ type ConnectionStore interface {
 type CredentialStore interface {
 	// SwapCredential installs next as the active version if the active
 	// version is expectActive (0 for none) and next.Version is
-	// expectActive+1. Otherwise it returns [ErrConflict]. The previous
-	// version is kept until destroyed.
+	// expectActive+1. Otherwise it returns [ErrConflict]. Older versions
+	// are removed in the same operation, so a superseded credential does not
+	// outlive its replacement in storage.
 	SwapCredential(ctx context.Context, expectActive int, next Credential) error
 	// ActiveCredential returns the active version.
 	ActiveCredential(ctx context.Context, owner OwnerID, connectionID string) (Credential, error)

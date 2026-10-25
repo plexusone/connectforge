@@ -10,8 +10,12 @@ import (
 // requestIDHeaders are the response headers providers use for a request ID.
 var requestIDHeaders = []string{"X-Request-Id", "Cf-Ray", "X-Github-Request-Id", "Request-Id"}
 
+// maxRequestID bounds the request ID kept from a response header.
+const maxRequestID = 128
+
 // StatusError is a provider's refusal, classified. It carries the status and
-// the provider's request ID, never a body.
+// the provider's request ID, never a body. The request ID is at most 128
+// printable ASCII characters; anything else in the header is dropped.
 type StatusError struct {
 	Provider  string
 	Status    int
@@ -39,7 +43,7 @@ func Classify(providerKey string, resp *http.Response) error {
 	}
 	e := &StatusError{Provider: providerKey, Status: resp.StatusCode}
 	for _, h := range requestIDHeaders {
-		if v := resp.Header.Get(h); v != "" {
+		if v := requestID(resp.Header.Get(h)); v != "" {
 			e.RequestID = v
 			break
 		}
@@ -57,4 +61,16 @@ func Classify(providerKey string, resp *http.Response) error {
 		e.Class = cf.ErrInvalidCredential
 	}
 	return e
+}
+
+// requestID returns v's printable ASCII characters, at most maxRequestID of
+// them: a header is the provider's data and ends up in stored health.
+func requestID(v string) string {
+	b := make([]byte, 0, min(len(v), maxRequestID))
+	for i := 0; i < len(v) && len(b) < maxRequestID; i++ {
+		if c := v[i]; c >= 0x21 && c <= 0x7e {
+			b = append(b, c)
+		}
+	}
+	return string(b)
 }

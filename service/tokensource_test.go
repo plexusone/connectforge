@@ -108,7 +108,7 @@ func TestBrokerUsesATokenSource(t *testing.T) {
 	st := memstore.New()
 	b, err := broker.New(broker.Options{
 		Store: st, Crypto: cryptotest.New(), Providers: reg, Authorizer: authz{},
-		Egress: egress.Policy{AllowPrivate: true, Transport: srv.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
+		Egress: egress.Policy{AllowPrefixes: loopback, Transport: srv.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
 	})
 	if err != nil {
 		t.Fatal(err)

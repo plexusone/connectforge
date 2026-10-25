@@ -65,7 +65,9 @@ Races are decided by the database, not by locks in the process:
 - `UpdateConnection` is a conditional update on the connection's revision. The
   loser gets `ErrConflict` and retries (the service retries a few times).
 - `SwapCredential` installs version *n+1* only if the active version is *n*; a
-  unique index on (owner, connection, version) decides concurrent swaps.
+  unique index on (owner, connection, version) decides concurrent swaps. The
+  same transaction deletes the older versions, so only the active credential
+  stays sealed in the table.
 - A lease is a row with an expiry, taken by a conditional insert or update, so
   refresh can be single-flight across processes. Expiry uses the store's
   clock, so processes sharing a database should have synchronized clocks.

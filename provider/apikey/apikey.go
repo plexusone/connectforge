@@ -91,6 +91,9 @@ func New(cfg Config) (*Provider, error) {
 	if cfg.Verify.Path == "" {
 		return nil, fmt.Errorf("apikey %s: a verify path is required", cfg.Manifest.Key)
 	}
+	if cfg.Verify.AccountIDPath == "" && (cfg.Account == nil || cfg.Account.AccountIDPath == "") && !m.AccountUnverifiable {
+		return nil, fmt.Errorf("apikey %s: an account ID path is required unless method %q is AccountUnverifiable", cfg.Manifest.Key, cfg.Method)
+	}
 	return &Provider{cfg: cfg, base: strings.TrimSuffix(cfg.Manifest.BaseURLs[0], "/")}, nil
 }
 

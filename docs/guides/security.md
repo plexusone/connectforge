@@ -28,7 +28,7 @@ module is built so that:
 | Stolen database contents | Credentials are ciphertext; additional data binds owner, connection and version, so a ciphertext cannot be moved |
 | Cross-tenant access | The owner is in every store method; the conformance suite proves refusal; optional row-level security repeats it in the database |
 | A secret in a log, error or response | `Secret` redacts in every format; provider errors carry a status and a request ID, never a body; a test confines `Reveal` to the broker and providers |
-| Server-side request forgery through a configurable endpoint | Hosts come from the manifest; HTTPS only; no redirect to another host; private, loopback, link-local and shared addresses are refused after DNS resolution |
+| Server-side request forgery through a configurable endpoint | Hosts come from the manifest; HTTPS only; no redirect to another host; private, loopback, link-local, shared and other special-purpose addresses, and IPv6 forms (NAT64, 6to4, Teredo, IPv4-compatible) that embed one, are refused after DNS resolution |
 | A lost update under concurrency | Compare-and-swap on the connection revision and on the credential version |
 | A credential that cannot be read | The connection is not used; there is no fallback |
 | An authorization backend outage mistaken for "no" | An `Authorizer` error that is not `ErrDenied` is reported as a failure |
@@ -40,8 +40,13 @@ module is built so that:
 - **Use a stable, non-reusable owner.** An organization ID, not a slug or a
   name that can be released and given to someone else.
 - **Fail closed in the transaction hook** when there is no tenant.
-- **Keep the egress policy strict in production.** `AllowPrivate` and
-  `AllowHTTP` exist for tests against local fakes; leave them off.
+- **Keep the egress policy strict in production.** `AllowPrefixes`,
+  `AllowPrivate` and `AllowHTTP` exist for tests against local fakes; leave
+  them off. When a development or staging setup needs a non-public
+  destination, list only its range in `AllowPrefixes` (for example
+  `127.0.0.0/8`) rather than setting the deprecated `AllowPrivate`.
+  Link-local and cloud metadata addresses (`169.254.0.0/16`, `fe80::/10`,
+  `fd00:ec2::254`, `100.100.100.200`) are refused whatever the policy says.
 - **Back up your key material** with the database. Without the key, stored
   credentials cannot be read.
 - **Ask providers for the narrowest read permissions** their features need,

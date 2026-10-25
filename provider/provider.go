@@ -60,7 +60,14 @@ type AuthMethod struct {
 	// AccountSelection says how the account is chosen: "discovered" from the
 	// credential, or "chosen" by the person from a list.
 	AccountSelection string `json:"accountSelection,omitempty"`
-	HelpURL          string `json:"helpUrl,omitempty"`
+	// AccountUnverifiable says the provider cannot tell which account a
+	// credential belongs to. Without it, a credential whose validation does
+	// not return an account ID is refused, so a reconnect can always prove
+	// the replacement is for the same account. With it, a connection may
+	// have no account ID and a reconnect replaces its credential without
+	// that proof, which is recorded in the audit event.
+	AccountUnverifiable bool   `json:"accountUnverifiable,omitempty"`
+	HelpURL             string `json:"helpUrl,omitempty"`
 	// Setup is what a person does, in order, to create the credential at
 	// the service before entering it.
 	Setup []SetupStep `json:"setup,omitempty"`

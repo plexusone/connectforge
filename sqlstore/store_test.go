@@ -183,3 +183,48 @@ func TestUnsupportedDialect(t *testing.T) {
 		t.Fatal("nil database accepted")
 	}
 }
+
+func TestSwapRemovesSupersededCredentials(t *testing.T) {
+	ctx := context.Background()
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "cf.db")+"?_txlock=immediate&_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.SetMaxOpenConns(1)
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+	s := migrated(t, db, sqlstore.SQLite)
+	if _, err := s.CreateConnection(ctx, cf.Connection{ID: "c1", Owner: "org-a", Provider: "p", State: cf.StateConnected}); err != nil {
+		t.Fatal(err)
+	}
+	for v := 1; v <= 3; v++ {
+		c := cf.Credential{Owner: "org-a", ConnectionID: "c1", Version: v, Kind: "k", Ciphertext: []byte(fmt.Sprint("sealed-", v)), CreatedAt: time.Now()}
+		if err := s.SwapCredential(ctx, v-1, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rows, err := db.QueryContext(ctx, "SELECT version FROM connectforge_credentials WHERE owner_id = ? AND connection_id = ?", "org-a", "c1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var versions []int
+	for rows.Next() {
+		var v int
+		if err := rows.Scan(&v); err != nil {
+			t.Fatal(err)
+		}
+		versions = append(versions, v)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if err := rows.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(versions, []int{3}) {
+		t.Fatalf("stored versions: %v", versions)
+	}
+}

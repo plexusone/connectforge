@@ -214,7 +214,8 @@ func activeVersion(ctx context.Context, c *ent.Client, owner cf.OwnerID, id stri
 }
 
 // SwapCredential implements [cf.CredentialStore]. The unique index on
-// (owner, connection, version) decides between concurrent swaps.
+// (owner, connection, version) decides between concurrent swaps. Older
+// versions are deleted in the same transaction.
 func (s *Store) SwapCredential(ctx context.Context, expectActive int, next cf.Credential) error {
 	return s.inTx(ctx, func(c *ent.Client) error {
 		if _, err := getConnection(ctx, c, next.Owner, next.ConnectionID); err != nil {
@@ -245,6 +246,13 @@ func (s *Store) SwapCredential(ctx context.Context, expectActive int, next cf.Cr
 		}
 		if err != nil {
 			return fmt.Errorf("sqlstore: swap credential: %w", err)
+		}
+		_, err = c.Credential.Delete().Where(
+			credential.OwnerID(string(next.Owner)), credential.ConnectionID(next.ConnectionID),
+			credential.VersionLT(next.Version),
+		).Exec(ctx)
+		if err != nil {
+			return fmt.Errorf("sqlstore: remove superseded credentials: %w", err)
 		}
 		return nil
 	})

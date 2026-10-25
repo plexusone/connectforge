@@ -3,6 +3,8 @@ package memstore_test
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -37,5 +39,22 @@ func TestLeaseExpires(t *testing.T) {
 	clock.t = clock.t.Add(time.Second)
 	if _, err := s.Acquire(ctx, "k", time.Minute); err != nil {
 		t.Fatalf("after expiry: %v", err)
+	}
+}
+
+func TestSwapRemovesSupersededCredentials(t *testing.T) {
+	ctx := context.Background()
+	s := memstore.New()
+	if _, err := s.CreateConnection(ctx, cf.Connection{ID: "c1", Owner: "org-a", Provider: "p", State: cf.StateConnected}); err != nil {
+		t.Fatal(err)
+	}
+	for v := 1; v <= 3; v++ {
+		ct := []byte(fmt.Sprintf("sealed-%d", v))
+		if err := s.SwapCredential(ctx, v-1, cf.Credential{Owner: "org-a", ConnectionID: "c1", Version: v, Kind: "k", Ciphertext: ct}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := memstore.CredentialVersions(s, "org-a", "c1"); !slices.Equal(got, []int{3}) {
+		t.Fatalf("stored versions: %v", got)
 	}
 }

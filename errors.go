@@ -20,6 +20,12 @@ var (
 	// account is a new connection, so the features bound to this one never
 	// silently read someone else's data.
 	ErrAccountMismatch = errors.New("connectforge: credential is for a different account")
+	// ErrAccountUnknown is returned when the provider did not identify the
+	// account a credential belongs to, or the connection has no recorded
+	// account, so a replacement credential cannot be shown to be for the
+	// same account. An auth method that cannot identify accounts says so
+	// with AccountUnverifiable in its manifest.
+	ErrAccountUnknown = errors.New("connectforge: the credential's account could not be identified")
 	// ErrLeaseHeld is returned when a lease is held by someone else.
 	ErrLeaseHeld = errors.New("connectforge: lease held")
 )

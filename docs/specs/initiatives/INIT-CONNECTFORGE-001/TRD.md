@@ -116,7 +116,7 @@ only by compare-and-swap on its revision.
 type Health struct {
     LastValidatedAt  time.Time
     LastValidation   Outcome   // ok, failed, unknown
-    LastError        string    // classified, never containing a secret
+    LastError        string    // classified; never a secret, a body, a URL or an address
     ConsecutiveFails int
     // CredentialExpiresAt is when the current credential stops working, as
     // the provider reported at the last successful validation.
@@ -148,9 +148,11 @@ type Credential struct {
 The plaintext structure for each `Kind` is private to its provider and
 sealed as a whole. The ciphertext is a self-describing envelope, so it
 records which key version sealed it and needs no separate key reference.
-Credentials are append-only by version, and the credential store tracks the
-active version. Older versions are kept until the connection's credentials
-are destroyed, so a replacement can be validated before it is activated.
+Credentials are versioned, and the credential store tracks the active
+version. A replacement is validated before it is sealed and activated, and
+activating it removes the older versions in the same operation, so a
+superseded credential is not left sealed in storage where a later
+compromise of the key could expose it.
 
 ### Grants and bindings
 
@@ -191,7 +193,8 @@ type ConnectionStore interface {
 
 type CredentialStore interface {
     // SwapCredential installs next as active iff the active version is
-    // expectActive (0 for none) and next.Version == expectActive+1.
+    // expectActive (0 for none) and next.Version == expectActive+1, and
+    // removes the older versions.
     SwapCredential(ctx context.Context, expectActive int, next Credential) error
     ActiveCredential(ctx context.Context, owner OwnerID, connID string) (Credential, error)
     DestroyCredentials(ctx context.Context, owner OwnerID, connID string) error
@@ -385,6 +388,15 @@ Property names are camelCase (a document format owned here). A manifest
 never contains executable content. Secret fields are never echoed back by
 any API.
 
+Validation must return the account ID, so `Reconnect` can prove a
+replacement credential is for the connection's account: `Create` refuses a
+credential with no account ID, and `Reconnect` refuses one whose account
+differs (`ErrAccountMismatch`) or cannot be compared because either side has
+none (`ErrAccountUnknown`). An auth method whose provider cannot name the
+account sets `"accountUnverifiable": true`; its connections may have no
+account ID, and a reconnect that cannot compare accounts proceeds and
+records `account: unverified` in its audit event.
+
 An auth method may also guide a person through creating the credential:
 
 ```json
@@ -475,8 +487,14 @@ type Broker interface {
   client. Refresh (phase 3) happens when a client is made, under the lease.
 - The client is wrapped by `egress`: a request whose host is not in the
   provider's manifest `baseUrls` is refused, redirects to another host are
-  refused, and resolved private, loopback and link-local addresses are
-  refused unless the host explicitly allows a development destination.
+  refused, and a resolved address that is not public is refused: private,
+  loopback, link-local, shared, reserved and documentation ranges, and IPv6
+  transition forms that embed an IPv4 address (a NAT64 address is judged by
+  the IPv4 address it embeds; 6to4, Teredo and IPv4-compatible addresses are
+  refused outright), unless the host explicitly allows a development
+  destination by listing its range in `AllowPrefixes`. Link-local and cloud
+  metadata addresses, and IPv6 forms that embed one, are refused whatever
+  the policy allows.
 - The result is an `*http.Client` a provider SDK can accept
   (`WithHTTPClient`), which is how SDKs consume a connection without
   connectforge importing them.
