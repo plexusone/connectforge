@@ -9,6 +9,115 @@
   ],
   "releases": [
     {
+      "version": "v0.6.0",
+      "date": "2026-10-25",
+      "highlights": [
+        {
+          "description": "Egress hardening: link-local and cloud metadata addresses are refused whatever the policy, IPv6 forms that embed an internal IPv4 address are refused, and a base transport's TLS dialer can no longer bypass the address check"
+        },
+        {
+          "description": "Reconnect fails closed: a replacement credential must be shown to belong to the connection's account, unless the auth method declares that accounts cannot be identified"
+        },
+        {
+          "description": "Superseded credential versions are removed on swap, and stored health no longer carries provider headers, URLs or resolved addresses"
+        },
+        {
+          "description": "Breaking changes for `AllowPrivate` policies, providers that return no account ID, and custom `CredentialStore` implementations; see the upgrade guide"
+        }
+      ],
+      "breaking": [
+        {
+          "description": "`egress.Policy.AllowPrivate` no longer allows link-local addresses (`169.254.0.0/16`, `fe80::/10`) or cloud metadata addresses; they are refused whatever the policy says"
+        },
+        {
+          "description": "The egress address check refuses IANA special-purpose ranges that are not public destinations (such as `0.0.0.0/8`, `192.0.0.0/24`, `198.18.0.0/15`, `240.0.0.0/4` and the documentation ranges) and IPv6 addresses that embed an internal IPv4 address (NAT64, IPv4-compatible, 6to4, Teredo) or are site-local"
+        },
+        {
+          "description": "`egress.Client` clears `DialTLSContext`, `DialTLS` and `Dial` on the cloned `Policy.Transport`; TLS settings come from its `TLSClientConfig` only"
+        },
+        {
+          "description": "`Service.Create` refuses a credential whose validation returns no account ID, and `Service.Reconnect` returns `ErrAccountUnknown` when either the provider's or the connection's account ID is missing, unless the auth method sets `AccountUnverifiable`"
+        },
+        {
+          "description": "`apikey.New` requires an `AccountIDPath` (in `Verify` or `Account`) unless the auth method is `AccountUnverifiable`"
+        },
+        {
+          "description": "The `CredentialStore.SwapCredential` contract now requires removing versions older than the one installed, in the same operation"
+        },
+        {
+          "description": "`Health.LastError` holds only a provider's classified refusal (provider, class, status and a bounded request ID) or the provider and the failure's class; the full error is in the audit event"
+        }
+      ],
+      "upgradeGuide": [
+        {
+          "description": "Replace `AllowPrivate: true` with `AllowPrefixes` listing only the ranges a development or test setup needs, such as `netip.MustParsePrefix(\"127.0.0.0/8\")`; a test destination on a link-local or metadata address must move to another address"
+        },
+        {
+          "description": "For a provider that cannot name the account a credential belongs to, set `AccountUnverifiable: true` on its `provider.AuthMethod`; otherwise make its `Validate` return `AccountID` (for `apikey`, set `AccountIDPath`)"
+        },
+        {
+          "description": "Connections stored without an account ID under a method that is not `AccountUnverifiable` cannot be reconnected (`ErrAccountUnknown`); connect them again as new connections and move their bindings"
+        },
+        {
+          "description": "Custom `CredentialStore` implementations: delete versions older than `next.Version` in `SwapCredential`, atomically with installing it"
+        },
+        {
+          "description": "Base transports that customised `DialTLSContext`, `DialTLS` or `Dial`: move TLS settings, including client certificates, into `TLSClientConfig`"
+        },
+        {
+          "description": "Code or dashboards that parsed `Health.LastError` for detail: read the audit event's reason instead"
+        }
+      ],
+      "security": [
+        {
+          "description": "The dial-time address check only unmapped IPv4-mapped IPv6 addresses, so an IPv6 address embedding an internal IPv4 address in another form passed: a NAT64 address such as `64:ff9b::a9fe:a9fe`, which a DNS64/NAT64 gateway translates to `169.254.169.254`, an IPv4-compatible address such as `::127.0.0.1`, and 6to4 and Teredo addresses. Several IPv4 special-purpose ranges were also allowed. The check now requires a global unicast, non-private address, judges a well-known-prefix NAT64 address by the IPv4 address it embeds, and refuses the special-purpose ranges that are not public destinations"
+        },
+        {
+          "description": "`Policy.AllowPrivate` turned off every address check, so a deployment that set it to reach an internal mock could also reach `169.254.169.254`, `fd00:ec2::254` and other cloud metadata endpoints. Link-local and metadata addresses, and IPv6 forms that embed one, are now refused whatever the policy"
+        },
+        {
+          "description": "`egress.Client` cloned `Policy.Transport` and replaced only `DialContext`. When the base transport set `DialTLSContext` or `DialTLS`, `net/http` used it for HTTPS instead, so the address check never ran and a provider host resolving to a loopback, private or metadata address was reached. These dialers are now cleared, so TLS is negotiated over a connection made by the checked dialer"
+        },
+        {
+          "description": "`Reconnect` refused a credential for a different account only when both the stored and the newly validated account IDs were present. When the provider returned no account ID, a credential for any account was installed under the existing connection, so every consumer bound to it started reading another account. The check now fails closed"
+        },
+        {
+          "description": "`SwapCredential` kept every earlier ciphertext until the connection was disconnected or deleted, so a later compromise of the encryption key would expose every replaced credential, including one replaced because it was suspected leaked. Older versions are now removed in the same operation (in a transaction in `sqlstore`, under the lock in `memstore`, which also zeroes the removed ciphertext)"
+        },
+        {
+          "description": "`Test` stored the full validation error in `Health.LastError`, which anyone who may view the connection reads: a provider's request-ID header verbatim and unbounded, and for network or egress failures the request URL and resolved address, including internal addresses. `provider.Classify` now keeps at most 128 printable ASCII characters of the request ID, and health records only the classified refusal or the failure's class"
+        }
+      ],
+      "added": [
+        {
+          "description": "`egress.Policy.AllowPrefixes`: the specific non-public ranges a development or test setup may reach; link-local and metadata addresses are refused even when listed"
+        },
+        {
+          "description": "`provider.AuthMethod.AccountUnverifiable` and `connectforge.ErrAccountUnknown`; a reconnect that proceeds without comparing accounts records `account=unverified` in its audit event"
+        }
+      ],
+      "changed": [
+        {
+          "description": "The broker builds one egress client per set of manifest hosts and hands out copies that share its transport, so connections are pooled; previously every validation and `HTTPClient` call built a new transport that was never closed, growing goroutines, file descriptors and provider connections"
+        }
+      ],
+      "deprecated": [
+        {
+          "description": "`egress.Policy.AllowPrivate`: list only the ranges a development setup needs in `AllowPrefixes`"
+        }
+      ],
+      "documentation": [
+        {
+          "description": "Connections, providers, security, storage and using-connections guides and the TRD describe the egress address rules, `AllowPrefixes`, the fail-closed account check, credential version removal and the bounded health message"
+        }
+      ],
+      "tests": [
+        {
+          "description": "Blocked-address table for special-purpose and IPv4-embedding IPv6 addresses, base-transport dialer replacement, shared broker transport, account checks on create and reconnect, bounded request IDs and health messages, and superseded-version removal in both stores"
+        }
+      ]
+    },
+    {
       "version": "v0.5.0",
       "date": "2026-10-21",
       "highlights": [
