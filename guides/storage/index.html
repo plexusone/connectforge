@@ -936,6 +936,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.5.0/" class="md-nav__link">
         
   
@@ -1276,7 +1304,9 @@ of failing:</p>
 <li><code>UpdateConnection</code> is a conditional update on the connection's revision. The
   loser gets <code>ErrConflict</code> and retries (the service retries a few times).</li>
 <li><code>SwapCredential</code> installs version <em>n+1</em> only if the active version is <em>n</em>; a
-  unique index on (owner, connection, version) decides concurrent swaps.</li>
+  unique index on (owner, connection, version) decides concurrent swaps. The
+  same transaction deletes the older versions, so only the active credential
+  stays sealed in the table.</li>
 <li>A lease is a row with an expiry, taken by a conditional insert or update, so
   refresh can be single-flight across processes. Expiry uses the store's
   clock, so processes sharing a database should have synchronized clocks.</li>

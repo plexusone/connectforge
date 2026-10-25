@@ -930,6 +930,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.5.0/" class="md-nav__link">
         
   
@@ -1238,7 +1266,7 @@ module is built so that:</p>
 </tr>
 <tr>
 <td>Server-side request forgery through a configurable endpoint</td>
-<td>Hosts come from the manifest; HTTPS only; no redirect to another host; private, loopback, link-local and shared addresses are refused after DNS resolution</td>
+<td>Hosts come from the manifest; HTTPS only; no redirect to another host; private, loopback, link-local, shared and other special-purpose addresses, and IPv6 forms (NAT64, 6to4, Teredo, IPv4-compatible) that embed one, are refused after DNS resolution</td>
 </tr>
 <tr>
 <td>A lost update under concurrency</td>
@@ -1261,8 +1289,13 @@ module is built so that:</p>
 <li><strong>Use a stable, non-reusable owner.</strong> An organization ID, not a slug or a
   name that can be released and given to someone else.</li>
 <li><strong>Fail closed in the transaction hook</strong> when there is no tenant.</li>
-<li><strong>Keep the egress policy strict in production.</strong> <code>AllowPrivate</code> and
-  <code>AllowHTTP</code> exist for tests against local fakes; leave them off.</li>
+<li><strong>Keep the egress policy strict in production.</strong> <code>AllowPrefixes</code>,
+  <code>AllowPrivate</code> and <code>AllowHTTP</code> exist for tests against local fakes; leave
+  them off. When a development or staging setup needs a non-public
+  destination, list only its range in <code>AllowPrefixes</code> (for example
+  <code>127.0.0.0/8</code>) rather than setting the deprecated <code>AllowPrivate</code>.
+  Link-local and cloud metadata addresses (<code>169.254.0.0/16</code>, <code>fe80::/10</code>,
+  <code>fd00:ec2::254</code>, <code>100.100.100.200</code>) are refused whatever the policy says.</li>
 <li><strong>Back up your key material</strong> with the database. Without the key, stored
   credentials cannot be read.</li>
 <li><strong>Ask providers for the narrowest read permissions</strong> their features need,

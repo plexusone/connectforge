@@ -953,6 +953,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.5.0/" class="md-nav__link">
         
   
@@ -1335,7 +1363,7 @@ provider was briefly unavailable. That does not make it unusable.</p>
 </tr>
 <tr>
 <td><code>LastError</code></td>
-<td>A classified message with the status and the provider's request ID. Never a response body</td>
+<td>A classified message: the provider's refusal with its status and request ID (at most 128 printable characters), or only the failure's class, such as <code>connectforge: transient failure</code>, for a network or egress failure. Never a response body, a URL or a resolved address; the full error is in the audit event</td>
 </tr>
 <tr>
 <td><code>ConsecutiveFails</code></td>
@@ -1458,6 +1486,11 @@ before <code>CredentialExpiresAt</code>, then reconnect with it.</p>
 stored, so a rejected one changes nothing. It must belong to the same account
 as the connection (<code>ErrAccountMismatch</code> otherwise): connecting another account
 is a new connection, so a feature never silently reads someone else's data.
+The check fails closed: when the provider returns no account ID, or the
+connection has none recorded, the reconnect is refused with
+<code>ErrAccountUnknown</code>, unless the auth method is <code>AccountUnverifiable</code>, in which
+case the credential is replaced and the audit event records
+<code>account: unverified</code>.
 On success the connection is <code>connected</code> again with fresh health, and its
 credential has a new version.</p>
 <p>Reconnect also recovers a connection whose sealed credential can no longer be
@@ -1504,6 +1537,10 @@ normal outcome that is recorded; read it from the returned connection:</p>
 <tr>
 <td><code>ErrAccountMismatch</code></td>
 <td>A reconnect's credential belongs to a different account</td>
+</tr>
+<tr>
+<td><code>ErrAccountUnknown</code></td>
+<td>The provider did not identify the credential's account, or the connection has no recorded account, so the account cannot be checked</td>
 </tr>
 <tr>
 <td><code>ErrConflict</code></td>

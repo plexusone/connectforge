@@ -1,0 +1,1706 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tenant connections to external services for Go applications">
+      
+      
+      
+        <link rel="canonical" href="https://plexusone.github.io/connectforge/releases/v0.6.0/">
+      
+      
+        <link rel="prev" href="../../specs/initiatives/INIT-CONNECTFORGE-001/ROADMAP/">
+      
+      
+        <link rel="next" href="../v0.5.0/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>v0.6.0 - connectforge</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="https://plexusone.dev/css/plexusone-mkdocs.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v060" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+<!-- PlexusOne Unified Navigation -->
+<div id="plexus-nav-root"></div>
+<script src="https://plexusone.dev/js/plexus-nav.js"></script>
+
+
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="connectforge" class="md-header__button md-logo" aria-label="connectforge" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            connectforge
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              v0.6.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/plexusone/connectforge" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    plexusone/connectforge
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="connectforge" class="md-nav__button md-logo" aria-label="connectforge" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    connectforge
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/plexusone/connectforge" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    plexusone/connectforge
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/connections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connections and Their Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/using-connections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using a Connection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Provider
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/host-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrating with a Host
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/initiatives/INIT-CONNECTFORGE-001/PRD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/initiatives/INIT-CONNECTFORGE-001/TRD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/initiatives/INIT-CONNECTFORGE-001/PLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/initiatives/INIT-CONNECTFORGE-001/ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Releases
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Highlights
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security fixes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#egress-address-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Egress address check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#account-check-on-reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account check on reconnect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#superseded-credentials-removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Superseded credentials removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-without-provider-or-network-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health without provider or network detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other changes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-replace-allowprivate-with-allowprefixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Replace AllowPrivate with AllowPrefixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configure-tls-through-tlsclientconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Configure TLS through TLSClientConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-make-every-provider-identify-the-account-or-say-it-cannot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Make every provider identify the account, or say it cannot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-reconnect-connections-stored-without-an-account-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Reconnect connections stored without an account ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-custom-credentialstore-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Custom CredentialStore implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-readers-of-healthlasterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Readers of Health.LastError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-update-the-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Update the module
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v0.5.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.5.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v0.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v0.3.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.3.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v0.2.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.2.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v0.1.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Highlights
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security fixes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#egress-address-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Egress address check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#account-check-on-reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account check on reconnect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#superseded-credentials-removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Superseded credentials removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-without-provider-or-network-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health without provider or network detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other changes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-replace-allowprivate-with-allowprefixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Replace AllowPrivate with AllowPrefixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configure-tls-through-tlsclientconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Configure TLS through TLSClientConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-make-every-provider-identify-the-account-or-say-it-cannot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Make every provider identify the account, or say it cannot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-reconnect-connections-stored-without-an-account-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Reconnect connections stored without an account ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-custom-credentialstore-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Custom CredentialStore implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-readers-of-healthlasterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Readers of Health.LastError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-update-the-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Update the module
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="v060">v0.6.0<a class="headerlink" href="#v060" title="Permanent link">&para;</a></h1>
+<p><strong>Release Date:</strong> 2026-10-25</p>
+<h2 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Egress refuses more of what a server should never reach.</strong> Link-local and
+  cloud metadata addresses are refused whatever the policy says, IPv6 forms
+  that embed an internal IPv4 address are refused, and a base transport's TLS
+  dialer can no longer bypass the address check. <code>AllowPrefixes</code> replaces the
+  all-or-nothing <code>AllowPrivate</code>.</li>
+<li><strong>Reconnect fails closed.</strong> A replacement credential must be shown to belong
+  to the connection's account, unless the auth method declares that accounts
+  cannot be identified.</li>
+<li><strong>Replaced credentials are gone.</strong> Swapping a credential removes the older
+  versions in the same operation.</li>
+<li><strong>Health shows less.</strong> <code>Health.LastError</code> keeps a provider's classified
+  refusal and otherwise only the failure's class; the full error is in the
+  audit event.</li>
+<li><strong>Breaking changes</strong> for <code>AllowPrivate</code> policies, providers that return no
+  account ID, and custom <code>CredentialStore</code> implementations. See
+  <a href="#upgrading">Upgrading</a>.</li>
+</ul>
+<h2 id="security-fixes">Security fixes<a class="headerlink" href="#security-fixes" title="Permanent link">&para;</a></h2>
+<h3 id="egress-address-check">Egress address check<a class="headerlink" href="#egress-address-check" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Before</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Only IPv4-mapped IPv6 addresses were unmapped before the check</td>
+<td>A well-known-prefix NAT64 address (<code>64:ff9b::a9fe:a9fe</code>, which a DNS64/NAT64 gateway translates to <code>169.254.169.254</code>) is judged by the IPv4 address it embeds; IPv4-compatible (<code>::127.0.0.1</code>), 6to4, Teredo, local-use NAT64 and site-local addresses are refused</td>
+</tr>
+<tr>
+<td>Several IPv4 special-purpose ranges were allowed</td>
+<td><code>0.0.0.0/8</code>, <code>192.0.0.0/24</code>, <code>198.18.0.0/15</code>, <code>240.0.0.0/4</code>, the broadcast address and the documentation ranges are refused; only global unicast, non-private addresses pass</td>
+</tr>
+<tr>
+<td><code>AllowPrivate</code> turned off every address check</td>
+<td>Link-local (<code>169.254.0.0/16</code>, <code>fe80::/10</code>) and cloud metadata addresses (such as <code>fd00:ec2::254</code> and <code>100.100.100.200</code>), and IPv6 forms that embed one, are refused whatever the policy</td>
+</tr>
+<tr>
+<td><code>egress.Client</code> replaced only <code>DialContext</code> on the base transport</td>
+<td><code>DialTLSContext</code>, <code>DialTLS</code> and <code>Dial</code> are cleared too, so <code>net/http</code> cannot use a TLS dialer that skips the check</td>
+</tr>
+</tbody>
+</table>
+<p>The last row closed a bypass: when <code>Policy.Transport</code> set <code>DialTLSContext</code> or
+<code>DialTLS</code>, HTTPS connections used it instead of the checked dialer, and a
+provider host resolving to a loopback, private or metadata address was
+reached. TLS settings, including client certificates, still come from the base
+transport's <code>TLSClientConfig</code>.</p>
+<h3 id="account-check-on-reconnect">Account check on reconnect<a class="headerlink" href="#account-check-on-reconnect" title="Permanent link">&para;</a></h3>
+<p><code>Reconnect</code> refused a credential for a different account only when both the
+stored account ID and the newly validated one were present. When the provider
+returned none, for example an <code>apikey</code> provider without an <code>AccountIDPath</code>, the
+check was skipped and a credential for any account was installed under the
+existing connection, so every consumer bound to it started reading another
+account.</p>
+<p>Now:</p>
+<ul>
+<li><code>Create</code> refuses a credential whose validation returns no account ID.</li>
+<li><code>Reconnect</code> refuses with the new <code>ErrAccountUnknown</code> when either the
+  provider's or the connection's account ID is missing.</li>
+<li>An auth method whose provider cannot name accounts opts out with the new
+  <code>AuthMethod.AccountUnverifiable</code>. A reconnect that then cannot compare
+  accounts proceeds, and its audit event carries <code>account=unverified</code>.</li>
+<li>Accounts named on both sides must still match (<code>ErrAccountMismatch</code>).</li>
+<li><code>apikey.New</code> requires an <code>AccountIDPath</code>, in <code>Verify</code> or <code>Account</code>, unless
+  the method is <code>AccountUnverifiable</code>.</li>
+</ul>
+<h3 id="superseded-credentials-removed">Superseded credentials removed<a class="headerlink" href="#superseded-credentials-removed" title="Permanent link">&para;</a></h3>
+<p><code>SwapCredential</code> inserted the new credential version and kept every earlier
+ciphertext until the connection was disconnected or deleted. Each <code>Reconnect</code>
+left the replaced credential sealed in storage, so a later compromise of the
+encryption key would expose every historical credential, including one
+replaced because it was suspected leaked but could not be revoked at the
+provider.</p>
+<p><code>SwapCredential</code> now removes the older versions in the same operation: in a
+transaction in <code>sqlstore</code>, and under the lock in <code>memstore</code>, which also zeroes
+the removed ciphertext. Concurrent swaps are still decided by the version check
+and the unique index.</p>
+<h3 id="health-without-provider-or-network-detail">Health without provider or network detail<a class="headerlink" href="#health-without-provider-or-network-detail" title="Permanent link">&para;</a></h3>
+<p><code>Test</code> stored the full validation error in <code>Health.LastError</code>, which anyone who
+may view the connection reads. A provider's refusal embedded its request-ID
+response header verbatim, with no limit on length or content, and a network or
+egress failure carried the request URL and the resolved address, including
+internal addresses that an egress refusal named.</p>
+<p><code>provider.Classify</code> now keeps at most 128 printable ASCII characters of the
+request ID. <code>Test</code> records a provider's classified refusal (provider, class,
+status and the bounded request ID) and, for any other failure, only the
+provider and the failure's class, such as <code>connectforge: transient failure</code>.
+The full error is still in the audit event's reason.</p>
+<h2 id="other-changes">Other changes<a class="headerlink" href="#other-changes" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>One egress transport per provider.</strong> The broker built a new egress client,
+  and so a new <code>http.Transport</code>, for every validation and every <code>HTTPClient</code>
+  call, and never closed them. Repeatedly testing a connection could grow the
+  server's goroutines and file descriptors without bound. The broker now builds
+  the restricted client once per set of manifest hosts and hands out copies
+  that share its transport; a caller's change to its copy, such as its timeout,
+  does not affect other callers.</li>
+<li><strong>Deprecated:</strong> <code>egress.Policy.AllowPrivate</code>. List only the ranges a
+  development setup needs in <code>AllowPrefixes</code>.</li>
+</ul>
+<h2 id="upgrading">Upgrading<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h2>
+<h3 id="1-replace-allowprivate-with-allowprefixes">1. Replace <code>AllowPrivate</code> with <code>AllowPrefixes</code><a class="headerlink" href="#1-replace-allowprivate-with-allowprefixes" title="Permanent link">&para;</a></h3>
+<p>A policy with <code>AllowPrivate</code> set no longer reaches link-local or cloud metadata
+addresses, and every policy now refuses the special-purpose ranges above. List
+only the ranges a development or test destination needs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// Before</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">policy</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">egress</span><span class="p">.</span><span class="nx">Policy</span><span class="p">{</span><span class="nx">Hosts</span><span class="p">:</span><span class="w"> </span><span class="nx">hosts</span><span class="p">,</span><span class="w"> </span><span class="nx">AllowPrivate</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">AllowHTTP</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// After</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nx">policy</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">egress</span><span class="p">.</span><span class="nx">Policy</span><span class="p">{</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nx">Hosts</span><span class="p">:</span><span class="w">         </span><span class="nx">hosts</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nx">AllowPrefixes</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">netip</span><span class="p">.</span><span class="nx">Prefix</span><span class="p">{</span><span class="nx">netip</span><span class="p">.</span><span class="nx">MustParsePrefix</span><span class="p">(</span><span class="s">&quot;127.0.0.0/8&quot;</span><span class="p">)},</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nx">AllowHTTP</span><span class="p">:</span><span class="w">     </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>A test fake listening on a link-local or metadata address must move to another
+address; no setting reaches those. Keep <code>AllowPrefixes</code>, <code>AllowPrivate</code> and
+<code>AllowHTTP</code> off in production.</p>
+<h3 id="2-configure-tls-through-tlsclientconfig">2. Configure TLS through <code>TLSClientConfig</code><a class="headerlink" href="#2-configure-tls-through-tlsclientconfig" title="Permanent link">&para;</a></h3>
+<p>If your <code>Policy.Transport</code> set <code>DialTLSContext</code>, <code>DialTLS</code> or <code>Dial</code>, those are
+now cleared. Move TLS settings, including client certificates, into the base
+transport's <code>TLSClientConfig</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">base</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">DefaultTransport</span><span class="p">.(</span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Transport</span><span class="p">).</span><span class="nx">Clone</span><span class="p">()</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">base</span><span class="p">.</span><span class="nx">TLSClientConfig</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">tls</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="nx">Certificates</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">tls</span><span class="p">.</span><span class="nx">Certificate</span><span class="p">{</span><span class="nx">clientCert</span><span class="p">}}</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nx">policy</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">egress</span><span class="p">.</span><span class="nx">Policy</span><span class="p">{</span><span class="nx">Hosts</span><span class="p">:</span><span class="w"> </span><span class="nx">hosts</span><span class="p">,</span><span class="w"> </span><span class="nx">Transport</span><span class="p">:</span><span class="w"> </span><span class="nx">base</span><span class="p">}</span>
+</code></pre></div>
+<h3 id="3-make-every-provider-identify-the-account-or-say-it-cannot">3. Make every provider identify the account, or say it cannot<a class="headerlink" href="#3-make-every-provider-identify-the-account-or-say-it-cannot" title="Permanent link">&para;</a></h3>
+<p>Without an account ID, <code>Create</code> now fails with <code>ErrAccountUnknown</code>.</p>
+<ul>
+<li>
+<p>For an <code>apikey</code> provider, set <code>AccountIDPath</code> on the <code>Verify</code> request, or on
+  an <code>Account</code> request when the verification response does not name the
+  account:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">apikey</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">apikey</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">Manifest</span><span class="p">:</span><span class="w"> </span><span class="nx">manifest</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">Verify</span><span class="p">:</span><span class="w">   </span><span class="nx">apikey</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span><span class="nx">Path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/v1/me&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">AccountIDPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;account.id&quot;</span><span class="p">},</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">})</span>
+</code></pre></div>
+</li>
+<li>
+<p>For a custom provider, return <code>Result.AccountID</code> from <code>Validate</code>.</p>
+</li>
+<li>If the service has no way to name the account a credential belongs to, set
+  <code>AccountUnverifiable: true</code> on that <code>provider.AuthMethod</code> in the manifest.
+  Reconnects then replace the credential without the account proof and record
+  <code>account=unverified</code> in the audit event.</li>
+</ul>
+<h3 id="4-reconnect-connections-stored-without-an-account-id">4. Reconnect connections stored without an account ID<a class="headerlink" href="#4-reconnect-connections-stored-without-an-account-id" title="Permanent link">&para;</a></h3>
+<p>A connection created before this release without an account ID, under a method
+that is not <code>AccountUnverifiable</code>, can no longer be reconnected: <code>Reconnect</code>
+returns <code>ErrAccountUnknown</code>. Connect the service again as a new connection,
+bind its consumers to it with <code>Bind</code>, then <code>Unbind</code> them from the old one and
+<code>Disconnect</code> it. Handle
+<code>ErrAccountUnknown</code> wherever you handle <code>ErrAccountMismatch</code>.</p>
+<h3 id="5-custom-credentialstore-implementations">5. Custom <code>CredentialStore</code> implementations<a class="headerlink" href="#5-custom-credentialstore-implementations" title="Permanent link">&para;</a></h3>
+<p>The <code>SwapCredential</code> contract changed: besides installing <code>next</code> as the active
+version, it must remove every version older than <code>next.Version</code> in the same
+operation, so a superseded credential never outlives its replacement in
+storage. Do both in one transaction, or under one lock.</p>
+<h3 id="6-readers-of-healthlasterror">6. Readers of <code>Health.LastError</code><a class="headerlink" href="#6-readers-of-healthlasterror" title="Permanent link">&para;</a></h3>
+<p><code>LastError</code> no longer contains URLs, resolved addresses or unbounded provider
+headers. Code or dashboards that parsed it for detail should read the reason
+on the connection's audit events instead.</p>
+<h3 id="7-update-the-module">7. Update the module<a class="headerlink" href="#7-update-the-module" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/plexusone/connectforge@v0.6.0
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>go<span class="w"> </span>mod<span class="w"> </span>tidy
+</code></pre></div>
+<h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>A restored database backup still holds old credentials.</strong> Removal on swap
+  covers the live store only.</li>
+<li><strong>The shared store test suite does not yet check version removal.</strong> The
+  bundled stores test it themselves; a custom store should add its own test.</li>
+<li><strong>Everything in the earlier limitations</strong> still applies.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/plexusone/connectforge" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

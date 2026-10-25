@@ -925,6 +925,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.5.0/" class="md-nav__link">
         
   
@@ -1219,7 +1247,7 @@ and an agent can read what a connection needs. It contains no code.</p>
 </tr>
 <tr>
 <td><code>AuthMethods</code></td>
-<td>One or more ways to connect: <code>Key</code>, <code>Fields</code>, <code>Scopes</code>, <code>AccountSelection</code>, <code>HelpURL</code>, and the guidance <code>Setup</code> and <code>Rotation</code></td>
+<td>One or more ways to connect: <code>Key</code>, <code>Fields</code>, <code>Scopes</code>, <code>AccountSelection</code>, <code>AccountUnverifiable</code>, <code>HelpURL</code>, and the guidance <code>Setup</code> and <code>Rotation</code></td>
 </tr>
 <tr>
 <td><code>HelpURL</code></td>
@@ -1330,7 +1358,8 @@ provider:</p>
 a number indexes an array: <code>AccountIDPath</code>, <code>AccountLabelPath</code>, <code>ScopesPath</code>
 for an array of strings, and <code>ExpiresAtPath</code> for the token's expiry as an
 RFC 3339 timestamp. A missing or unparseable expiry leaves it unknown rather
-than failing validation.</p>
+than failing validation. <code>New</code> requires an <code>AccountIDPath</code> in <code>Verify</code> or
+<code>Account</code> unless the auth method is <code>AccountUnverifiable</code>.</p>
 <p>When a provider reports an expiry, the service records it on the credential
 and in the connection's <code>Health.CredentialExpiresAt</code>, so an interface can say
 when the credential must be replaced.</p>
@@ -1384,9 +1413,14 @@ service with <code>provider.NewTokenClient(p, m, hc, nil)</code>.</p>
 <li><strong>Call <code>Reveal</code> only here.</strong> <code>Secret.Reveal</code> is for provider adapters and
   the broker. A test fails if it is called anywhere else in the module; clear
   the copy you take.</li>
-<li><strong>Do not make the account discovery depend on a human.</strong> If the credential
-  names no account, leave <code>AccountID</code> empty and let the display name identify
-  the connection.</li>
+<li><strong>Return the account ID.</strong> The service refuses a credential whose
+  validation returns no <code>AccountID</code> (<code>ErrAccountUnknown</code>), because without it
+  a reconnect cannot prove the replacement credential is for the same
+  account. If the service genuinely cannot name the account, set
+  <code>AccountUnverifiable</code> on the auth method: the connection is then stored
+  without an account ID, and a reconnect replaces its credential without the
+  proof and records <code>account: unverified</code> on the audit event. Do not make the
+  account discovery depend on a human.</li>
 </ul>
 <h2 id="register-it">Register it<a class="headerlink" href="#register-it" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">reg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">provider</span><span class="p">.</span><span class="nx">NewRegistry</span><span class="p">()</span>
