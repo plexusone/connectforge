@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	entgo.io/ent v0.14.6
-	github.com/jackc/pgx/v5 v5.11.0
+	github.com/jackc/pgx/v5 v5.12.0
 	modernc.org/sqlite v1.61.0
 )
 
@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/ncruces/go-strftime v1.1.0 // indirect
