@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	entgo.io/ent v0.14.6
 	github.com/jackc/pgx/v5 v5.12.0
-	modernc.org/sqlite v1.61.0
+	modernc.org/sqlite v1.61.1
 )
 
 require (
