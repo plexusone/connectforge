@@ -422,9 +422,13 @@ func (e *env) seen(tok string) bool {
 func TestReconnectReplacesTheCredential(t *testing.T) {
 	ctx := context.Background()
 	e := setup(t)
+	e.found = []provider.Detail{{Label: "Zones", Values: []string{"example.com"}}}
 	c, err := e.create(t, fakeapi.Good)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(c.Health.Details) != 1 || c.Health.Details[0].Values[0] != "example.com" {
+		t.Fatalf("details after create: %+v", c.Health.Details)
 	}
 	use := cf.Use{Consumer: cf.Consumer{Kind: "application", ID: "dash"}, Purpose: "traffic"}
 	if err := e.svc.Bind(ctx, owner, agent, c.ID, use.Consumer, use.Purpose); err != nil {
@@ -438,10 +442,15 @@ func TestReconnectReplacesTheCredential(t *testing.T) {
 	}
 
 	// A new token for the same account puts it right without a new
-	// connection, so the binding is untouched.
+	// connection, so the binding is untouched, and its check's details
+	// replace the old ones.
+	e.found = []provider.Detail{{Label: "Zones", Values: []string{"example.net"}}}
 	r, err := e.reconnect(t, admin, c.ID, fakeapi.Rotated)
 	if err != nil {
 		t.Fatalf("reconnect: %v", err)
+	}
+	if d := r.Health.Details; len(d) != 1 || d[0].Label != "Zones" || len(d[0].Values) != 1 || d[0].Values[0] != "example.net" {
+		t.Fatalf("details after reconnect: %+v", d)
 	}
 	if r.ID != c.ID || r.State != cf.StateConnected || r.Health.LastValidation != cf.OutcomeOK || r.Health.ConsecutiveFails != 0 {
 		t.Fatalf("reconnected: %+v", r)

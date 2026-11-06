@@ -38,6 +38,12 @@ func TestDetailsAreShortened(t *testing.T) {
 	if long.Values[1] != "tabhere" {
 		t.Errorf("control characters kept: %q", long.Values[1])
 	}
+	// Directional overrides and isolates are removed, so a value cannot
+	// display reordered.
+	bidi := details([]provider.Detail{{Label: "Sites\u202e", Values: []string{"evil\u202egnp.exe", "\u2066a\u2069\u200fb\u061c"}}})
+	if bidi[0].Label != "Sites" || bidi[0].Values[0] != "evilgnp.exe" || bidi[0].Values[1] != "ab" {
+		t.Errorf("directional characters kept: %+v", bidi)
+	}
 	if details(nil) != nil {
 		t.Error("no details gave a non-nil slice")
 	}
