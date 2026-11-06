@@ -80,6 +80,19 @@ type Health struct {
 	// the provider reported at the last successful validation; nil when it
 	// does not expire or the provider does not say.
 	CredentialExpiresAt *time.Time `json:"credentialExpiresAt,omitempty"`
+	// Details are what the last successful validation found the credential
+	// reaches, such as the sites an account can read, shortened for display.
+	// A failed validation keeps them. They never hold a secret.
+	Details []Detail `json:"details,omitempty"`
+}
+
+// Detail is one thing a validation found, such as "Properties" and the
+// properties an account can read.
+type Detail struct {
+	Label  string   `json:"label"`
+	Values []string `json:"values,omitempty"`
+	// More is how many values were left out to keep the detail short.
+	More int `json:"more,omitempty"`
 }
 
 // Connection is an owner's relationship with one account at a provider. It
@@ -110,6 +123,14 @@ func (c Connection) Clone() Connection {
 	if c.Health.CredentialExpiresAt != nil {
 		t := *c.Health.CredentialExpiresAt
 		c.Health.CredentialExpiresAt = &t
+	}
+	if c.Health.Details != nil {
+		ds := make([]Detail, len(c.Health.Details))
+		for i, d := range c.Health.Details {
+			d.Values = slices.Clone(d.Values)
+			ds[i] = d
+		}
+		c.Health.Details = ds
 	}
 	return c
 }
