@@ -27,6 +27,12 @@
           "commit": "2352bfa"
         }
       ],
+      "security": [
+        {
+          "description": "Validation details drop directional formatting characters, such as U+202E, as well as control characters, so a provider's text cannot display reordered",
+          "commit": "24f45a8"
+        }
+      ],
       "dependencies": [
         {
           "description": "`modernc.org/sqlite` 1.61.1",
@@ -46,6 +52,10 @@
         {
           "description": "Validation details: their limits, storage in every store, and kept after a failed check",
           "commit": "9eb2d40"
+        },
+        {
+          "description": "Directional characters removed from details, and a reconnect's details replacing the old ones",
+          "commit": "feffe81"
         }
       ]
     },

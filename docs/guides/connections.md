@@ -49,7 +49,7 @@ Every store enforces the transition table; a change it forbids returns
 | `LastError` | A classified message: the provider's refusal with its status and request ID (at most 128 printable characters), or only the failure's class, such as `connectforge: transient failure`, for a network or egress failure. Never a response body, a URL or a resolved address; the full error is in the audit event |
 | `ConsecutiveFails` | Failed checks in a row; reset by a success |
 | `CredentialExpiresAt` | When the current credential stops working, as the provider reported at the last successful check; empty when it does not expire or the provider does not say |
-| `Details` | What the last successful check found the credential reaches, such as the sites an account can read: up to 8 labelled lists of up to 25 values each, with `More` counting the values left out. A failed check keeps them |
+| `Details` | What the last successful check found the credential reaches, such as the sites an account can read: up to 8 labelled lists of up to 25 values each, with `More` counting the values left out, and control and directional formatting characters removed. A failed check keeps them |
 
 The expiry is refreshed by `Create`, a successful `Test` and `Reconnect`, and
 is also recorded on the sealed credential. Show it next to the connection so
