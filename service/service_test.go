@@ -75,7 +75,22 @@ func (r *recorder) types() []cf.EventType {
 // loopback lets the tests reach their local fake API.
 var loopback = []netip.Prefix{netip.MustParsePrefix("127.0.0.0/8")}
 
+// detailed adds details to a provider's successful validations.
+type detailed struct {
+	provider.Provider
+	found *[]provider.Detail
+}
+
+func (d detailed) Validate(ctx context.Context, hc *http.Client, m provider.Material) (provider.Result, error) {
+	res, err := d.Provider.Validate(ctx, hc, m)
+	if err == nil {
+		res.Details = *d.found
+	}
+	return res, err
+}
+
 type env struct {
+	found  []provider.Detail
 	api    *fakeapi.API
 	store  *memstore.Store
 	broker *broker.Broker
@@ -87,10 +102,10 @@ func setup(t *testing.T) *env {
 	t.Helper()
 	api := fakeapi.Start(t)
 	reg := provider.NewRegistry()
-	if err := reg.Register(api.Provider(t)); err != nil {
+	e := &env{api: api, store: memstore.New(), audit: &recorder{}}
+	if err := reg.Register(detailed{Provider: api.Provider(t), found: &e.found}); err != nil {
 		t.Fatal(err)
 	}
-	e := &env{api: api, store: memstore.New(), audit: &recorder{}}
 	b, err := broker.New(broker.Options{
 		Store: e.store, Crypto: cryptotest.New(), Providers: reg, Authorizer: authz{}, Auditor: e.audit,
 		Egress: egress.Policy{AllowPrefixes: loopback, Transport: api.Client().Transport.(*http.Transport)}, //nolint:forcetypeassert // httptest's client uses *http.Transport
@@ -654,5 +669,34 @@ func TestExpiryIsRecorded(t *testing.T) {
 	}
 	if cr, err = e.store.ActiveCredential(ctx, owner, c.ID); err != nil || cr.Version != 2 || cr.ExpiresAt != nil {
 		t.Fatalf("replaced credential: version %d, expiry %v, %v", cr.Version, cr.ExpiresAt, err)
+	}
+}
+
+// TestTestKeepsWhatValidationFound checks that a successful validation's
+// details are stored, shortened, and kept when a later validation fails.
+func TestTestKeepsWhatValidationFound(t *testing.T) {
+	ctx := context.Background()
+	e := setup(t)
+	e.found = []provider.Detail{{Label: "Zones", Values: []string{"example.com", "example.org"}}}
+	c, err := e.create(t, fakeapi.Good)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d := c.Health.Details; len(d) != 1 || d[0].Label != "Zones" || len(d[0].Values) != 2 {
+		t.Fatalf("details after create: %+v", d)
+	}
+
+	e.found = []provider.Detail{{Label: "Zones", Values: []string{"example.net"}}}
+	if c, err = e.svc.Test(ctx, owner, agent, c.ID); err != nil || len(c.Health.Details) != 1 || c.Health.Details[0].Values[0] != "example.net" {
+		t.Fatalf("details after a test: %+v, %v", c.Health.Details, err)
+	}
+
+	e.api.Revoke(fakeapi.Good)
+	c, err = e.svc.Test(ctx, owner, agent, c.ID)
+	if err != nil || c.Health.LastValidation != cf.OutcomeFailed {
+		t.Fatalf("failed test: %+v, %v", c.Health, err)
+	}
+	if d := c.Health.Details; len(d) != 1 || d[0].Values[0] != "example.net" {
+		t.Errorf("a failed test dropped the last details: %+v", d)
 	}
 }
