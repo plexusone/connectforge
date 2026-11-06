@@ -20,7 +20,8 @@ const (
 
 // details returns a provider's details shortened for storage and display:
 // at most maxDetails, each with at most maxDetailValues values, labels and
-// values cut to length, and control characters removed. A detail with no
+// values cut to length, and control and directional formatting characters
+// removed. A detail with no
 // label is dropped. More counts the values left out.
 func details(in []provider.Detail) []cf.Detail {
 	var out []cf.Detail
@@ -49,11 +50,14 @@ func details(in []provider.Detail) []cf.Detail {
 	return out
 }
 
-// clip removes control characters and surrounding space from s and cuts it
-// to at most n bytes on a rune boundary, marking a cut with an ellipsis.
+// clip removes control characters, directional formatting characters and
+// surrounding space from s, and cuts it to at most n bytes on a rune
+// boundary, marking a cut with an ellipsis. Directional overrides and
+// isolates, such as U+202E, would let a provider's text display reordered
+// and mislead the person reading it.
 func clip(s string, n int) string {
 	s = strings.TrimSpace(strings.Map(func(r rune) rune {
-		if unicode.IsControl(r) {
+		if unicode.IsControl(r) || unicode.Is(unicode.Bidi_Control, r) {
 			return -1
 		}
 		return r
