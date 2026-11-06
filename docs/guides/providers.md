@@ -112,6 +112,11 @@ When a provider reports an expiry, the service records it on the credential
 and in the connection's `Health.CredentialExpiresAt`, so an interface can say
 when the credential must be replaced.
 
+A provider can also return `Details`, what its check found the credential
+reaches, such as the properties or projects an account can read. The service
+shortens them and keeps them in `Health.Details`. They are shown to people as
+they are, so they must never hold a secret.
+
 ## Writing your own
 
 Implement `Provider` when a service needs more than a header token: a signed
