@@ -29,7 +29,7 @@
       ],
       "security": [
         {
-          "description": "Validation details drop directional formatting characters, such as U+202E, as well as control characters, so a provider's text cannot display reordered",
+          "description": "Validation details drop directional formatting characters, such as U+202E, as well as control characters",
           "commit": "24f45a8"
         }
       ],
