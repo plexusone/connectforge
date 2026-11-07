@@ -27,7 +27,7 @@ require (
 	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
-	github.com/zclconf/go-cty v1.19.0 // indirect
+	github.com/zclconf/go-cty v1.20.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.2.0 // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
