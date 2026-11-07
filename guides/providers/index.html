@@ -925,6 +925,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.7.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.7.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.6.0/" class="md-nav__link">
         
   
@@ -1363,6 +1391,10 @@ than failing validation. <code>New</code> requires an <code>AccountIDPath</code>
 <p>When a provider reports an expiry, the service records it on the credential
 and in the connection's <code>Health.CredentialExpiresAt</code>, so an interface can say
 when the credential must be replaced.</p>
+<p>A provider can also return <code>Details</code>, what its check found the credential
+reaches, such as the properties or projects an account can read. The service
+shortens them and keeps them in <code>Health.Details</code>. They are shown to people as
+they are, so they must never hold a secret.</p>
 <h2 id="writing-your-own">Writing your own<a class="headerlink" href="#writing-your-own" title="Permanent link">&para;</a></h2>
 <p>Implement <code>Provider</code> when a service needs more than a header token: a signed
 request, a two-step handshake, or a different verification.</p>

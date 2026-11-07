@@ -953,6 +953,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/v0.7.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.7.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/v0.6.0/" class="md-nav__link">
         
   
@@ -1373,12 +1401,17 @@ provider was briefly unavailable. That does not make it unusable.</p>
 <td><code>CredentialExpiresAt</code></td>
 <td>When the current credential stops working, as the provider reported at the last successful check; empty when it does not expire or the provider does not say</td>
 </tr>
+<tr>
+<td><code>Details</code></td>
+<td>What the last successful check found the credential reaches, such as the sites an account can read: up to 8 labelled lists of up to 25 values each, with <code>More</code> counting the values left out, and control and directional formatting characters removed. A failed check keeps them</td>
+</tr>
 </tbody>
 </table>
 <p>The expiry is refreshed by <code>Create</code>, a successful <code>Test</code> and <code>Reconnect</code>, and
 is also recorded on the sealed credential. Show it next to the connection so
 a person replaces the credential before it lapses rather than after a feature
-fails.</p>
+fails. Show the details too, so a person can see what the connection reaches
+without opening the provider, and notice when it reaches less than expected.</p>
 <h2 id="failures-are-classified">Failures are classified<a class="headerlink" href="#failures-are-classified" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
