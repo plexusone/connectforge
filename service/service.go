@@ -122,7 +122,7 @@ func (s *Service) Create(ctx context.Context, in CreateInput) (cf.Connection, er
 	}
 	c.ExternalAccountID, c.ExternalLabel, c.Scopes = res.AccountID, res.AccountLabel, res.Scopes
 	c.State = cf.StateConnected
-	c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt}
+	c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt, Details: details(res.Details)}
 
 	created, err := s.o.Store.CreateConnection(ctx, c)
 	if err != nil {
@@ -246,7 +246,7 @@ func (s *Service) Test(ctx context.Context, owner cf.OwnerID, actor cf.Principal
 			}
 			return nil
 		}
-		c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt}
+		c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt, Details: details(res.Details)}
 		c.State = cf.StateConnected
 		if res.AccountLabel != "" {
 			c.ExternalLabel = res.AccountLabel
@@ -373,7 +373,7 @@ func (s *Service) Reconnect(ctx context.Context, in ReconnectInput) (cf.Connecti
 
 	out, err := s.update(ctx, in.Owner, in.Actor, in.ID, cf.ActionManage, func(c *cf.Connection) error {
 		c.State = cf.StateConnected
-		c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt}
+		c.Health = cf.Health{LastValidatedAt: now, LastValidation: cf.OutcomeOK, CredentialExpiresAt: res.ExpiresAt, Details: details(res.Details)}
 		if res.AccountID != "" {
 			c.ExternalAccountID = res.AccountID
 		}

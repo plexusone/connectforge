@@ -253,8 +253,9 @@ func testReturnsCopies(t *testing.T, s cf.Store) {
 }
 
 // testHealthRoundTrip checks that a connection's health, including the
-// credential's expiry, is stored and read back, is not shared with callers,
-// and is cleared when a replaced credential reports none.
+// credential's expiry and the validation's details, is stored and read
+// back, is not shared with callers, and is cleared when a replaced
+// credential reports none.
 func testHealthRoundTrip(t *testing.T, s cf.Store) {
 	ctx := context.Background()
 	c := mustCreate(t, s, conn(ownerA, "c1", "cloudflare"))
@@ -262,7 +263,8 @@ func testHealthRoundTrip(t *testing.T, s cf.Store) {
 	exp := time.Date(2026, 4, 3, 0, 0, 0, 0, time.UTC)
 	c.State = cf.StateConnected
 	stored := exp // the store gets its own copy, so exp stays the expected value
-	c.Health = cf.Health{LastValidatedAt: checked, LastValidation: cf.OutcomeOK, CredentialExpiresAt: &stored}
+	found := []cf.Detail{{Label: "Zones", Values: []string{"example.com", "example.org"}, More: 3}}
+	c.Health = cf.Health{LastValidatedAt: checked, LastValidation: cf.OutcomeOK, CredentialExpiresAt: &stored, Details: found}
 	c, err := s.UpdateConnection(ctx, c)
 	if err != nil {
 		t.Fatal(err)
@@ -275,6 +277,14 @@ func testHealthRoundTrip(t *testing.T, s cf.Store) {
 	if !h.LastValidatedAt.Equal(checked) || h.LastValidation != cf.OutcomeOK ||
 		h.CredentialExpiresAt == nil || !h.CredentialExpiresAt.Equal(exp) {
 		t.Fatalf("health: %+v", h)
+	}
+	if len(h.Details) != 1 || h.Details[0].Label != "Zones" || len(h.Details[0].Values) != 2 ||
+		h.Details[0].Values[1] != "example.org" || h.Details[0].More != 3 {
+		t.Fatalf("details: %+v", h.Details)
+	}
+	got.Health.Details[0].Values[0] = "changed"
+	if again, err := s.GetConnection(ctx, ownerA, "c1"); err != nil || again.Health.Details[0].Values[0] != "example.com" {
+		t.Fatalf("details share memory with callers: %+v, %v", again.Health.Details, err)
 	}
 	*got.Health.CredentialExpiresAt = checked
 	again, err := s.GetConnection(ctx, ownerA, "c1")

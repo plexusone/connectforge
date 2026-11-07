@@ -37,6 +37,18 @@ type Result struct {
 	// ExpiresAt is when the credential stops working, if the provider
 	// reports it; nil when it does not expire or the provider does not say.
 	ExpiresAt *time.Time
+	// Details are what the check found that the credential reaches, for
+	// people to see, such as the sites or projects the account can read.
+	// They are shown as they are, so they must never hold a secret, and the
+	// service shortens long lists.
+	Details []Detail
+}
+
+// Detail is one thing validation found, such as "Properties" and the
+// properties the account can read.
+type Detail struct {
+	Label  string
+	Values []string
 }
 
 // Manifest describes a provider so a user interface can render a connection

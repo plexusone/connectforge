@@ -9,6 +9,57 @@
   ],
   "releases": [
     {
+      "version": "v0.7.0",
+      "date": "2026-11-06",
+      "highlights": [
+        {
+          "description": "A connection shows what it reaches: validations can return details, such as the sites an account can read, kept shortened in `Health.Details`",
+          "commit": "2352bfa"
+        }
+      ],
+      "added": [
+        {
+          "description": "`provider.Result.Details` and `provider.Detail`, what a validation found the credential reaches",
+          "commit": "2352bfa"
+        },
+        {
+          "description": "`Health.Details` and `cf.Detail`: the last successful validation's details, at most 8 lists of 25 values with `More` counting the rest; a failed validation keeps them",
+          "commit": "2352bfa"
+        }
+      ],
+      "security": [
+        {
+          "description": "Validation details drop directional formatting characters, such as U+202E, as well as control characters, so a provider's text cannot display reordered",
+          "commit": "24f45a8"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "`modernc.org/sqlite` 1.61.1",
+          "commit": "e06e5c5"
+        },
+        {
+          "description": "`github.com/jackc/pgx/v5` 5.12.0",
+          "commit": "a4d99e0"
+        }
+      ],
+      "documentation": [
+        {
+          "description": "The connections and providers guides describe validation details"
+        }
+      ],
+      "tests": [
+        {
+          "description": "Validation details: their limits, storage in every store, and kept after a failed check",
+          "commit": "9eb2d40"
+        },
+        {
+          "description": "Directional characters removed from details, and a reconnect's details replacing the old ones",
+          "commit": "feffe81"
+        }
+      ]
+    },
+    {
       "version": "v0.6.0",
       "date": "2026-10-25",
       "highlights": [
